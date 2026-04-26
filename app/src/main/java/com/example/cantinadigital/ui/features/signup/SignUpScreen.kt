@@ -1,5 +1,6 @@
 package com.example.cantinadigital.ui.features.signup
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -44,6 +46,8 @@ fun SignUpScreen(
 ) {
 
     val state by viewModel.uiState.collectAsState()
+
+    val context = LocalContext.current
 
     Scaffold(
         modifier = modifier,
@@ -137,7 +141,7 @@ fun SignUpScreen(
                             .fillMaxWidth()
                             .height(50.dp),
                         onClick = {
-
+                            Toast.makeText(context, "Voce logou!", Toast.LENGTH_SHORT).show()
                         },
                         colors = ButtonColors(
                             containerColor = Color.Black,
