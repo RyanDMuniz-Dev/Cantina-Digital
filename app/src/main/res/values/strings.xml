@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Cantina Digital</string>
+    <string name="label_name">Name</string>
+    <string name="label_email" translatable="false">Email</string>
+    <string name="label_password">Password</string>
+    <string name="label_login" translatable="false">Login</string>
+    <string name="label_sign_up" translatable="false">Sign-up</string>
+    <string name="label_third_year" translatable="false">3%s</string>
 </resources>
