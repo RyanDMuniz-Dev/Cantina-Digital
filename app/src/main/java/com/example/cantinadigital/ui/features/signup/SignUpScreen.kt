@@ -217,6 +217,7 @@ fun SignUpScreen(
 
 }
 
+/*
 @Preview
 @Composable
 private fun SignUpScreenPreview() {
@@ -227,3 +228,4 @@ private fun SignUpScreenPreview() {
         )
     }
 }
+*/

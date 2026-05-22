@@ -1,7 +1,6 @@
 package com.example.cantinadigital.ui.features.signup
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.ui.features.signup.model.SignUpFormState

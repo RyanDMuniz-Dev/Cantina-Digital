@@ -30,7 +30,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 
         Column(
             modifier = modifier
-                .padding(15.dp)
+                .padding(innerPadding)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
