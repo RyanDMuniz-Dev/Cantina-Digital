@@ -5,16 +5,18 @@ plugins {
     alias(libs.plugins.hilt)                 // Hilt
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.android)
+
+    id("com.google.gms.google-services") // Necessário para o Firebase
 }
 
 android {
     namespace = "com.example.cantinadigital"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.example.cantinadigital"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 36 // isso está dando uma cobrinha amarela
         versionCode = 1
         versionName = "1.0"
 
@@ -62,6 +64,13 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
 
+    // implementa o BOM para gerenciar as versões automaticamente
+    implementation(platform("com.google.firebase:firebase-bom:34.16.0"))
+
+    // implementa SDKs necessárias
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
     implementation(platform(libs.supabase.bom))
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.auth)
@@ -77,7 +86,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
