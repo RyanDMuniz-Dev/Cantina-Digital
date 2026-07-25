@@ -1,65 +1,80 @@
 package com.example.cantinadigital.data.repository
 
-import com.example.cantinadigital.data.remote.SupabaseClientProvider
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.builtin.Email
-import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class Profile (
-    val id: String? = null,
-    val full_name: String,
-    val student_class: String
-)
+import com.example.cantinadigital.data.remote.FirebaseProvider
+import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.tasks.await
 
 class AuthRepository {
 
-    private val client = SupabaseClientProvider.client
+    private val auth = FirebaseProvider.auth
+    private val db = FirebaseProvider.db
 
+    fun getUsuarioAtual(): FirebaseUser? {
+        return auth.currentUser
+    }
+
+    fun isUserLoggedIn(): Boolean {
+        return auth.currentUser != null
+    }
+
+    /**
+     * Função de Login (bifurcada com nome signIn para alinhar com o LoginScreenViewModel)
+     */
+    suspend fun signIn(email: String, password: String): Result<Boolean> {
+        return try {
+            auth.signInWithEmailAndPassword(email, password).await()
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Função de Cadastro (alinhada com os parâmetros fullName e studentClass do SignUpScreenViewModel)
+     */
     suspend fun signUp(
         fullName: String,
-        studentClass: String,
         email: String,
-        password: String
-    ): Result<Unit> = runCatching {
+        password: String,
+        studentClass: String
+    ): Result<Boolean> {
+        return try {
+            // 1. Cria autenticação no Firebase Auth
+            val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+            val userId = authResult.user?.uid ?: throw Exception("Erro ao obter ID do usuário.")
 
-        // Cria a conta do usuario
-        client.auth.signUpWith(Email) {
-            this.email = email
-            this.password = password
-        }
-
-        // Faz login automatico para obter a sessão
-        client.auth.signInWith(Email) {
-            this.email = email
-            this.password = password
-        }
-
-        // Armazena o valor da sessão atual
-        val userId = client.auth.currentUserOrNull()?.id
-            ?: error("Usuário não encontrado após cadastro")
-
-        println("USER ID: $userId")
-
-        // Da INSERT na tabela "profile" no supabase
-        client.postgrest["profiles"].insert(
-            Profile(
-                id = userId,
-                full_name = fullName,
-                student_class = studentClass
+            // 2. Monta objeto de dados para o Firestore
+            val userProfile = hashMapOf(
+                "uid" to userId,
+                "nome" to fullName,
+                "email" to email,
+                "turma" to studentClass
             )
-        )
-    }
 
-    suspend fun signIn(
-        email: String,
-        password: String
-    ) : Result<Unit> = runCatching {
-        client.auth.signInWith(Email) {
-            this.email = email
-            this.password = password
+            // 3. Salva no Firestore na coleção "users"
+            db.collection("users").document(userId).set(userProfile).await()
+
+            Result.success(true)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
+    /**
+     * Puxa os dados do perfil logado (nome, turma)
+     */
+    suspend fun getDadosUsuarioLogado(): Result<Map<String, Any>?> {
+        val uid = auth.currentUser?.uid ?: return Result.failure(Exception("Nenhum usuário logado."))
+
+        return try {
+            val snapshot = db.collection("users").document(uid).get().await()
+            Result.success(snapshot.data)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun logout() {
+        auth.signOut()
+    }
 }

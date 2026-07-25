@@ -46,9 +46,9 @@ class SignUpScreenViewModel (
 
             val result = repository?.signUp(
                 fullName = state.name,
-                studentClass = state.studentClass.name,
                 email = state.email,
-                password = state.password
+                password = state.password,
+                studentClass = state.studentClass.name
             )
 
             result?.fold(

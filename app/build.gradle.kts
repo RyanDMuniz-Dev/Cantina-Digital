@@ -64,17 +64,15 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
 
-    // implementa o BOM para gerenciar as versões automaticamente
-    implementation(platform("com.google.firebase:firebase-bom:34.16.0"))
+    // Importa a plataforma Firebase BoM (gerencia as versões)
+    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
 
-    // implementa SDKs necessárias
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
+    // Bibliotecas do Firebase
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
 
-    implementation(platform(libs.supabase.bom))
-    implementation(libs.supabase.postgrest)
-    implementation(libs.supabase.auth)
-    implementation(libs.supabase.realtime)
+    // Suporte para chamadas assíncronas .await() no Kotlin
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
 
     implementation(libs.ktor.client.android)
 

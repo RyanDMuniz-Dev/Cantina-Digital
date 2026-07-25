@@ -12,11 +12,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.cantinadigital.data.remote.SupabaseClientProvider
+import com.example.cantinadigital.data.remote.FirebaseProvider
 import com.example.cantinadigital.ui.features.home.HomeScreen
 import com.example.cantinadigital.ui.features.login.LoginScreen
 import com.example.cantinadigital.ui.features.signup.SignUpScreen
-import io.github.jan.supabase.auth.auth
 
 sealed class Screen(
     val route: String
@@ -35,8 +34,9 @@ fun AppNavigation() {
     var isCheckingSection by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        val session = SupabaseClientProvider.client.auth.currentUserOrNull()
-        startDestination = if (session != null) Screen.Home.route else Screen.SignUp.route
+        // Verifica se há um usuário logado no Firebase Auth
+        val currentUser = FirebaseProvider.auth.currentUser
+        startDestination = if (currentUser != null) Screen.Home.route else Screen.SignUp.route
         isCheckingSection = false
     }
 
@@ -69,7 +69,6 @@ fun AppNavigation() {
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route)
                 }
-
             )
         }
 
@@ -90,7 +89,5 @@ fun AppNavigation() {
         composable(Screen.Home.route) {
             HomeScreen()
         }
-
     }
-
 }
