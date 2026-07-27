@@ -13,7 +13,9 @@ import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 @Preview
 @Composable
 private fun BottomTopBarPreview() {
-    CantinaDigitalTheme {
+    CantinaDigitalTheme (
+        darkTheme = true
+    ) {
         Scaffold(
             topBar = {
                 CantinaTopBar(
