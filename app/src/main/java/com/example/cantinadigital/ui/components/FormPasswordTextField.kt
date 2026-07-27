@@ -1,12 +1,13 @@
 package com.example.cantinadigital.ui.components
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,9 +16,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.cantinadigital.R
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
@@ -27,6 +30,7 @@ fun PasswordTextField(
     @StringRes label: Int,
     value: String,
     singleLine: Boolean = true,
+    keyboardOptions: KeyboardOptions,
     contentDescription: String? = null,
     placeholder: String? = null,
     onValueChanged: (String) -> Unit
@@ -34,11 +38,12 @@ fun PasswordTextField(
 
     var isPasswordVisible by remember { mutableStateOf(false) }
 
-    TextField(
-        modifier = modifier.fillMaxWidth(),
+    OutlinedTextField(
+        modifier = modifier.fillMaxWidth().padding(5.dp),
         value = value,
-        singleLine = singleLine,
         onValueChange = onValueChanged,
+        keyboardOptions = keyboardOptions,
+        singleLine = singleLine,
         label = {
             Text(text = stringResource(label))
         },
@@ -70,13 +75,16 @@ fun PasswordTextField(
 
 }
 
-@Preview
+@Preview (showBackground = true)
 @Composable
 private fun PasswordTextFieldPreview() {
     CantinaDigitalTheme {
         PasswordTextField(
-            value = "sadsda",
+            value = "myPassword",
             onValueChanged = {},
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
             label = R.string.app_name
         )
     }

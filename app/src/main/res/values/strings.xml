@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Cantina Digital</string>
+    <string name="label_name">Name</string>
+    <string name="label_email" translatable="false">Email</string>
+    <string name="label_password">Password</string>
+    <string name="label_login" translatable="false">Login</string>
+    <string name="label_sign_up" translatable="false">Sign-up</string>
+    <string name="label_third_year" translatable="false">3%s</string>
+    <string name="success_sign_up">Success Sign-up!</string>
+    <string name="sign_up_title">Sign-up</string>
+    <string name="already_have_an_account">Already have an Account? Enter</string>
+    <string name="success_login">Success Login!</string>
+    <string name="don_t_have_an_account_sign_up">Don\'t have an account? Sign-up.</string>
 </resources>
