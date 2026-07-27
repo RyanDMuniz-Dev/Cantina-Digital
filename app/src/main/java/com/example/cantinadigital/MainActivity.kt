@@ -22,8 +22,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-
-// test account
-// email: ryandmuniz@gmail.com
-// password: Cemep2026#

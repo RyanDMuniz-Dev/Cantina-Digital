@@ -1,4 +1,4 @@
-package com.example.cantinadigital.ui.components
+package com.example.cantinadigital.ui.components.selectors
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -51,7 +52,7 @@ fun SelectorBox(
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 12.dp).height(56.dp),
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(R.string.label_third_year, selectedClass),

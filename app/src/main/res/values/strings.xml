@@ -11,4 +11,8 @@
     <string name="already_have_an_account">Already have an Account? Enter</string>
     <string name="success_login">Success Login!</string>
     <string name="don_t_have_an_account_sign_up">Don\'t have an account? Sign-up.</string>
+    <string name="back">back</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="notifications">Notifications</string>
+    <string name="profile">profile</string>
 </resources>

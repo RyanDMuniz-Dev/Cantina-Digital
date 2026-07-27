@@ -40,11 +40,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cantinadigital.R
-import com.example.cantinadigital.ui.components.FormTextField
-import com.example.cantinadigital.ui.components.PasswordTextField
-import com.example.cantinadigital.ui.components.SelectorBox
+import com.example.cantinadigital.ui.components.fields.FormTextField
+import com.example.cantinadigital.ui.components.fields.PasswordTextField
+import com.example.cantinadigital.ui.components.selectors.SelectorBox
 import com.example.cantinadigital.ui.features.signup.model.ThirdYearClass
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
+import com.example.cantinadigital.ui.theme.PrimaryBlueDark
 
 @Composable
 fun SignUpScreen(
@@ -66,7 +67,7 @@ fun SignUpScreen(
 
     Scaffold(
         modifier = modifier,
-        containerColor = Color(0xFF003984)
+        containerColor = PrimaryBlueDark // Color(0xFF003984)
     ) { innerPadding ->
         Column(
             modifier = modifier
@@ -217,15 +218,13 @@ fun SignUpScreen(
 
 }
 
-/*
-@Preview
-@Composable
-private fun SignUpScreenPreview() {
-    CantinaDigitalTheme {
-        SignUpScreen(
-            modifier = Modifier,
-            viewModel = SignUpScreenViewModel(previewMode = true)
-        )
-    }
-}
-*/
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//private fun SignUpScreenPreview() {
+//    CantinaDigitalTheme {
+//        SignUpScreen(
+//            modifier = Modifier,
+//            viewModel = SignUpScreenViewModel(previewMode = true)
+//        )
+//    }
+//}

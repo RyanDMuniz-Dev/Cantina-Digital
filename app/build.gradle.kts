@@ -74,6 +74,9 @@ dependencies {
     // Suporte para chamadas assíncronas .await() no Kotlin
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
 
+    // Suporte para os ícones novos
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+
     implementation(libs.ktor.client.android)
 
     implementation(libs.hilt.android)

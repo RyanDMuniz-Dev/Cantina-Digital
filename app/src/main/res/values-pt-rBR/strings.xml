@@ -8,4 +8,7 @@
     <string name="already_have_an_account">Já possui uma conta? Entre</string>
     <string name="success_login">Login realizado com sucesso!</string>
     <string name="don_t_have_an_account_sign_up">Não tem uma conta? Cadastre-se</string>
+    <string name="back">voltar</string>
+    <string name="notifications">Notifications</string>
+    <string name="profile">profile</string>
 </resources>
