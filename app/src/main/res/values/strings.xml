@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">Cantina Digital</string>
+    <string name="delete_everything">C</string>
+    <string name="result">=</string>
+    <string name="division">÷</string>
+    <string name="sum">+</string>
+    <string name="multiplication">x</string>
+    <string name="subtraction">-</string>
+    <string name="percent">%</string>
+    <string name="n_real">,</string>
+    <string name="n_zero">0</string>
+    <string name="n_one">1</string>
+    <string name="n_two">2</string>
+    <string name="n_three">3</string>
+    <string name="n_four">4</string>
+    <string name="n_five">5</string>
+    <string name="n_six">6</string>
+    <string name="n_seven">7</string>
+    <string name="n_eight">8</string>
+    <string name="n_nine">9</string>
 </resources>
