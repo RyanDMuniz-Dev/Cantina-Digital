@@ -9,22 +9,36 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class NavigationItem (
     val title: String,
+    val route: String,
     val icon: ImageVector
 ) {
     object Dashboard: NavigationItem(
         title = "Dashboard",
+        route = "dashboard",
         Icons.Outlined.SpaceDashboard
     )
     object Orders: NavigationItem(
         title = "Pedidos",
+        route = "orders",
         Icons.AutoMirrored.Outlined.ReceiptLong
     )
     object Stock: NavigationItem(
         title = "Estoque",
+        route = "stock",
         Icons.Outlined.Inventory2
     )
     object Insights: NavigationItem(
         title = "Insights",
+        route = "insights",
         Icons.Outlined.Analytics
     )
+
+    companion object {
+        val items = listOf(
+            Dashboard,
+            Orders,
+            Stock,
+            Insights
+        )
+    }
 }
