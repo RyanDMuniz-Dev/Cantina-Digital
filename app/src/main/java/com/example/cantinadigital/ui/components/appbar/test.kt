@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
-@Preview
+@Preview(showSystemUi = true)
 @Composable
 private fun BottomTopBarPreview() {
     CantinaDigitalTheme (
