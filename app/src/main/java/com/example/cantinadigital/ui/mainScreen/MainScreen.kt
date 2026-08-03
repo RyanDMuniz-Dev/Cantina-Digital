@@ -16,6 +16,7 @@ import com.example.cantinadigital.ui.features.dashboard.DashboardScreen
 import com.example.cantinadigital.ui.features.insights.InsightsScreen
 import com.example.cantinadigital.ui.features.orders.OrdersScreen
 import com.example.cantinadigital.ui.features.stock.StockScreen
+import com.example.cantinadigital.ui.features.stock.StockViewModel
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 @Composable

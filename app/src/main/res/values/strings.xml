@@ -15,4 +15,8 @@
     <string name="dashboard" translatable="false">Dashboard</string>
     <string name="notifications">Notifications</string>
     <string name="profile">profile</string>
+    <string name="emoji">Emoji</string>
+    <string name="price">Price (R$)</string>
+    <string name="amount">Amount</string>
+    <string name="vendedor">Vendedor</string>
 </resources>
