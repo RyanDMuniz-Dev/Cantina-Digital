@@ -9,6 +9,5 @@ class OrderRepository (
     private val path: String = "pedidos"
 ) {
 
-    fun GetOrderFlow() : Flow<List<Order>>
 
 }
