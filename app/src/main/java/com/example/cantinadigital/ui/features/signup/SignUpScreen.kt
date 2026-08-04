@@ -1,10 +1,12 @@
-package com.example.cantinadigital.ui.features.login
+package com.example.cantinadigital.ui.features.signup
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,36 +42,38 @@ import androidx.compose.ui.unit.sp
 import com.example.cantinadigital.R
 import com.example.cantinadigital.ui.components.FormTextField
 import com.example.cantinadigital.ui.components.PasswordTextField
+import com.example.cantinadigital.ui.components.SelectorBox
+import com.example.cantinadigital.ui.features.signup.model.ThirdYearClass
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 @Composable
-fun LoginScreen(
+fun SignUpScreen(
     modifier: Modifier = Modifier,
-    viewModel: LoginScreenViewModel,
-    onLoginSuccess: () -> Unit = {},
-    onNavigateToSignUp: () -> Unit = {}
+    viewModel: SignUpScreenViewModel,
+    onSignUpSuccess: () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {}
 ) {
 
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(state.isSuccess) {
-        if (state.isSuccess){
-            Toast.makeText(context, context.getString(R.string.success_login), Toast.LENGTH_SHORT).show()
-            onLoginSuccess()
+        if (state.isSuccess) {
+            Toast.makeText(context, R.string.success_sign_up, Toast.LENGTH_SHORT).show()
+            onSignUpSuccess()
         }
     }
 
-    Scaffold (
+    Scaffold(
         modifier = modifier,
         containerColor = Color(0xFF003984)
-    ) {innerPadding ->
+    ) { innerPadding ->
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
             Box(
@@ -80,6 +84,8 @@ fun LoginScreen(
                     contentDescription = null,
                 )
             }
+
+            Spacer(modifier = Modifier.padding(top = 32.dp))
 
             Surface(
                 modifier = Modifier.width(350.dp),
@@ -94,7 +100,7 @@ fun LoginScreen(
                 ) {
 
                     Text(
-                        text = stringResource(R.string.label_login),
+                        text = stringResource(R.string.sign_up_title),
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(fontSize = 32.sp),
@@ -103,23 +109,56 @@ fun LoginScreen(
                             .padding(5.dp)
                     )
 
+                    Row (
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        FormTextField(
+                            label = R.string.label_name,
+                            leadingIcon = R.drawable.ic_person_24dp,
+                            value = state.name,
+                            onValueChanged = { viewModel.onNameChange(it) },
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Next
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                        SelectorBox(
+                            modifier = Modifier.padding(top = 7.dp),
+                            classList = listOf("3W", "3X", "3Y"),
+                            selectedClass = state.studentClass
+                        ) {
+
+                            var currentClass: ThirdYearClass = ThirdYearClass.Y
+
+                            when(it) {
+                                "3W" -> { currentClass = ThirdYearClass.W }
+                                "3X" -> { currentClass = ThirdYearClass.X }
+                                "3Y" -> { currentClass = ThirdYearClass.Y }
+                            }
+
+                            viewModel.onClassChange(currentClass)
+                        }
+                    }
+
                     FormTextField(
                         label = R.string.label_email,
                         leadingIcon = R.drawable.ic_mail_24dp,
                         value = state.email,
-                        onValueChanged = {  viewModel.onEmailChange(it) },
+                        onValueChanged = { viewModel.onEmailChange(it) },
                         keyboardOptions = KeyboardOptions.Default.copy(
                             imeAction = ImeAction.Next
-                        )
+                        ),
                     )
 
                     PasswordTextField(
                         label = R.string.label_password,
-                        value = state.pass,
+                        value = state.password,
                         onValueChanged = { viewModel.onPasswordChange(it) },
                         keyboardOptions = KeyboardOptions.Default.copy(
                             imeAction = ImeAction.Done
-                        )
+                        ),
+                        modifier = Modifier.padding(bottom = 15.dp)
                     )
 
                     ElevatedButton(
@@ -127,7 +166,7 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .height(50.dp),
                         onClick = {
-                            viewModel.onLogin()
+                            viewModel.onSignUp()
                         },
                         colors = ButtonColors(
                             containerColor = Color.Black,
@@ -136,7 +175,7 @@ fun LoginScreen(
                             disabledContentColor = Color.White
                         )
                     ) {
-                        if (state.isLoading) {
+                        if (state.isLoading){
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
                                 color = Color.White,
@@ -144,18 +183,18 @@ fun LoginScreen(
                             )
                         } else {
                             Text(
-                                text = stringResource(R.string.label_login),
+                                text = stringResource(R.string.label_sign_up),
                                 color = Color.White
                             )
                         }
                     }
 
                     TextButton(
-                        onClick = onNavigateToSignUp,
+                        onClick = onNavigateToLogin,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
                         Text(
-                            text = stringResource(R.string.don_t_have_an_account_sign_up),
+                            text = stringResource(R.string.already_have_an_account),
                             color = Color(0xFF003984),
                             style = MaterialTheme.typography.bodyMedium
                         )
@@ -173,7 +212,6 @@ fun LoginScreen(
                 }
 
             }
-
         }
     }
 
@@ -182,11 +220,11 @@ fun LoginScreen(
 /*
 @Preview
 @Composable
-private fun LoginScreenPreview() {
+private fun SignUpScreenPreview() {
     CantinaDigitalTheme {
-        LoginScreen(
-            viewModel = LoginScreenViewModel(previewMode = true),
-            onLoginSuccess = {}
+        SignUpScreen(
+            modifier = Modifier,
+            viewModel = SignUpScreenViewModel(previewMode = true)
         )
     }
 }
