@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cantinadigital.data.model.Product
 import com.example.cantinadigital.ui.components.StockItemCard
 import com.example.cantinadigital.ui.components.forms.AddProductBottomSheet
+import com.example.cantinadigital.ui.components.forms.EditProductBottomSheet
 import com.example.cantinadigital.ui.features.stock.model.AddProductUiState
 
 // Componente principal que se conecta ao ViewModel
@@ -42,11 +43,12 @@ fun StockScreen(
     val addProductState by viewModel.addProductState.collectAsState()
 
     var showAddBottomSheet by remember { mutableStateOf(false) }
+    var productToEdit by remember { mutableStateOf<Product?>(null) }
 
     LaunchedEffect(addProductState) {
         when (val state = addProductState) {
             is AddProductUiState.Success -> {
-                showAddBottomSheet = true
+                showAddBottomSheet = false
                 Toast.makeText(context, "Produto cadastrado com sucesso!", Toast.LENGTH_SHORT).show()
                 viewModel.resetAddProductState()
             }
@@ -63,13 +65,25 @@ fun StockScreen(
         products = products,
         showAddBottomSheet = showAddBottomSheet,
         isSavingProduct = addProductState is AddProductUiState.Loading,
+        productToEdit = productToEdit,
         onAddClick = { showAddBottomSheet = true },
         onDismissBottomSheet = { showAddBottomSheet = false },
         onConfirmAddProduct = { newProduct ->
             viewModel.addProduct(newProduct)
         },
         onEditClick = { selectedProduct ->
-
+            productToEdit = selectedProduct
+        },
+        onDismissEditBottomSheet = {
+            productToEdit = null
+        },
+        onConfirmUpdateProduct = { updatedProduct ->
+            viewModel.updateProduct(updatedProduct)
+            productToEdit = null
+        },
+        onConfirmDeleteProduct = { productTodDelete ->
+            viewModel.deleteProduct(productTodDelete)
+            productToEdit = null
         }
     )
 
@@ -81,11 +95,15 @@ fun StockContent(
     modifier: Modifier = Modifier,
     products: List<Product>,
     showAddBottomSheet: Boolean,
+    productToEdit: Product?,
     isSavingProduct: Boolean,
     onAddClick: () -> Unit,
     onDismissBottomSheet: () -> Unit,
     onConfirmAddProduct: (Product) -> Unit,
-    onEditClick: (Product) -> Unit
+    onEditClick: (Product) -> Unit,
+    onDismissEditBottomSheet: () -> Unit,
+    onConfirmUpdateProduct: (Product) -> Unit,
+    onConfirmDeleteProduct: (Product) -> Unit
 ) {
 
     Scaffold(
@@ -141,33 +159,16 @@ fun StockContent(
             )
         }
 
+        productToEdit?.let { product ->
+            EditProductBottomSheet(
+                modifier = Modifier,
+                productToEdit = product,
+                onDismissRequest = onDismissEditBottomSheet,
+                onConfirmUpdate = onConfirmUpdateProduct,
+                onConfirmDelete = onConfirmDeleteProduct
+            )
+        }
+
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

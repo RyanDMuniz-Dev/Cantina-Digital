@@ -12,7 +12,7 @@ class ProductRepository(
 ) {
 
     fun getProductFlow(): Flow<List<Product>> = callbackFlow {
-        val listener = firestore.collection("produtos")
+        val listener = firestore.collection(path)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
@@ -37,6 +37,36 @@ class ProductRepository(
             .addOnFailureListener {
                 onResult(false)
             }
+    }
+
+    fun updateProduct(product: Product, onResult: (Boolean) -> Unit) {
+
+        if (product.id.isBlank()) {
+            onResult(false)
+            return
+        }
+
+        firestore.collection(path)
+            .document(product.id)
+            .set(product)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+
+    }
+
+    fun deleteProduct(product: Product, onResult: (Boolean) -> Unit) {
+
+        if (product.id.isBlank()) {
+            onResult(false)
+            return
+        }
+
+        firestore.collection(path)
+            .document(product.id)
+            .delete()
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+
     }
 
 }
