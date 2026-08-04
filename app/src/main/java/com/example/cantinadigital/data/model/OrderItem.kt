@@ -1,7 +1,13 @@
 package com.example.cantinadigital.data.model
 
+import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.PropertyName
+
 data class OrderItem(
-    val productName: String = "",
-    val amount: Int = 0,
-    val unitPrice: Double = 0.0
+
+    @get:PropertyName("nome") @set:PropertyName("nome")
+    var name: String = "",
+
+    var amount: Int = 0
+
 )

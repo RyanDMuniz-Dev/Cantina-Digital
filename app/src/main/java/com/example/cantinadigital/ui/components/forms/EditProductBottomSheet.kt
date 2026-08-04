@@ -25,10 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cantinadigital.R
 import com.example.cantinadigital.data.model.Product
 import com.example.cantinadigital.ui.components.fields.SimpleFormTextField
+import com.example.cantinadigital.ui.features.stock.StockContent
+import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 import org.w3c.dom.Text
 
 @OptIn(ExperimentalMaterial3Api::class)
