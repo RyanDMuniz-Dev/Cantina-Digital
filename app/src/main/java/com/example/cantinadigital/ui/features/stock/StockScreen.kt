@@ -46,7 +46,10 @@ fun StockScreen(
 
     val context = LocalContext.current
     val products by viewModel.products.collectAsState()
+
     val addProductState by viewModel.addProductState.collectAsState()
+    val updateProductState by viewModel.updateProductState.collectAsState()
+    val deleteProductState by viewModel.deleteProductState.collectAsState()
 
     var showAddBottomSheet by remember { mutableStateOf(false) }
     var productToEdit by remember { mutableStateOf<Product?>(null) }
