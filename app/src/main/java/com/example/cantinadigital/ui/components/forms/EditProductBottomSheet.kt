@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -48,7 +50,10 @@ fun EditProductBottomSheet(
     var name by remember { mutableStateOf(productToEdit.nome) }
     var value by remember { mutableStateOf(productToEdit.valor.toString()) }
     var amount by remember { mutableStateOf(productToEdit.quantidade.toString()) }
+
+    var isProductCantina by remember { mutableStateOf(productToEdit.vendedor.equals("Cantina", ignoreCase = true)) }
     var seller by remember { mutableStateOf(productToEdit.vendedor) }
+    var cantinaTax by remember { mutableStateOf(productToEdit.cantinaTaxa.toString()) }
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
 
@@ -127,27 +132,72 @@ fun EditProductBottomSheet(
                 )
             }
 
-            // Campo Vendedor
-            OutlinedTextField(
-                value = seller,
-                onValueChange = { seller = it },
-                label = { Text("Vendedor") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+            Text(
+                text = "Vendedor do Produto",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
             )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = isProductCantina,
+                        onClick = { isProductCantina = true }
+                    )
+                    Text("Cantina")
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = !isProductCantina,
+                        onClick = { isProductCantina = false }
+                    )
+                    Text("Aluno")
+                }
+            }
+
+            if (!isProductCantina) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = seller,
+                        onValueChange = { seller = it },
+                        label = { Text("Nome do Aluno") },
+                        modifier = Modifier.weight(0.6f),
+                        singleLine = true
+                    )
+
+                    OutlinedTextField(
+                        value = cantinaTax,
+                        onValueChange = { cantinaTax = it },
+                        label = { Text("Taxa (%)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        modifier = Modifier.weight(0.4f),
+                        singleLine = true
+                    )
+                }
+            }
 
             // Botão Salvar Alterações
             Button(
                 onClick = {
                     val sanitizedValue = value.replace(",", ".").trim().toDoubleOrNull() ?: 0.0
                     val sanitizedAmount = amount.trim().toIntOrNull() ?: 0
+                    val sanitizedTax = if (isProductCantina) 0.0 else (cantinaTax.replace(",", ".").trim().toDoubleOrNull() ?: 0.0)
+                    val sanitizedSeller = if (isProductCantina) "Cantina" else seller.trim()
 
                     val updatedProduct = productToEdit.copy(
                         emoji = emoji.ifBlank { "📦" },
                         nome = name,
                         valor = sanitizedValue,
                         quantidade = sanitizedAmount,
-                        vendedor = seller
+                        vendedor = sanitizedSeller,
+                        cantinaTaxa = sanitizedTax
                     )
                     onConfirmUpdate(updatedProduct)
                 },

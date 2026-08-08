@@ -1,8 +1,12 @@
 package com.example.cantinadigital.data.model
 
+import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.PropertyName
 
 data class OrderItem(
+
+    @get:PropertyName("produto_id") @set:PropertyName("produto_id")
+    var productId: String = "",
 
     @get:PropertyName("nome") @set:PropertyName("nome")
     var name: String = "",
@@ -17,6 +21,6 @@ data class OrderItem(
     var vendedor: String = "Cantina",
 
     @get:PropertyName("taxa_cantina") @set:PropertyName("taxa_cantina")
-    var taxaCantinaPorcentagem: Double = 0.0
+    var taxaCantina: Double = 0.0
 
 )

@@ -10,12 +10,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -39,7 +41,10 @@ fun AddProductBottomSheet(
     var nome by remember { mutableStateOf("") }
     var valor by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("") }
-    var vendedor by remember { mutableStateOf("Cantina") }
+
+    var vendedor by remember { mutableStateOf("") }
+    var isProductCantina by remember { mutableStateOf(true) }
+    var cantinaTax by remember { mutableStateOf("20") }
 
     val isFormValid = nome.isNotBlank() && valor.isNotBlank() && quantidade.isNotBlank()
 
@@ -93,6 +98,7 @@ fun AddProductBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // campo do Preço
                 SimpleFormTextField(
                     value = valor,
                     onValueChanged = { valor = it },
@@ -114,16 +120,67 @@ fun AddProductBottomSheet(
 
             }
 
-            SimpleFormTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = vendedor,
-                label = R.string.vendedor,
-                singleLine = true,
-                onValueChanged = { vendedor = it },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
-                )
+            // origin selector
+            Text(
+                text = "Vendedor do produto",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
             )
+
+            Row(
+                modifier = Modifier,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = isProductCantina,
+                        onClick = { isProductCantina = true }
+                    )
+                    Text(
+                        text = "Cantina"
+                    )
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = !isProductCantina,
+                        onClick = { isProductCantina = false }
+                    )
+                    Text(
+                        text = "Aluno"
+                    )
+                }
+            }
+
+            if (!isProductCantina) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SimpleFormTextField(
+                        modifier = Modifier.weight(0.6f),
+                        value = vendedor,
+                        label = R.string.vendedor,
+                        singleLine = true,
+                        onValueChanged = { vendedor = it },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Next
+                        )
+                    )
+
+                    SimpleFormTextField(
+                        modifier = Modifier.weight(0.4f),
+                        value = cantinaTax,
+                        label = R.string.tax,
+                        singleLine = true,
+                        onValueChanged = { cantinaTax = it },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done
+                        )
+                    )
+                }
+            }
 
             // Botão de Salvar
             Button(
@@ -132,13 +189,16 @@ fun AddProductBottomSheet(
                 onClick = {
                     val sanitizedValue = valor.replace(",", ".").toDoubleOrNull() ?: 0.0
                     val sanitizedAmount = quantidade.trim().toIntOrNull() ?: 0
+                    val sanitizedTax = if (isProductCantina) 0.0 else (cantinaTax.replace(",", ".").trim().toDoubleOrNull() ?: 0.0)
+                    val sanitizedSeller = if (isProductCantina) "Cantina" else vendedor.trim()
 
                     val newProduct = Product(
                         emoji = emoji.ifBlank { "📦" },
-                        nome = nome,
+                        nome = nome.trim(),
                         valor = sanitizedValue,
                         quantidade = sanitizedAmount,
-                        vendedor = vendedor
+                        vendedor = sanitizedSeller,
+                        cantinaTaxa = sanitizedTax
                     )
                     onConfirmRequest(newProduct)
                 },

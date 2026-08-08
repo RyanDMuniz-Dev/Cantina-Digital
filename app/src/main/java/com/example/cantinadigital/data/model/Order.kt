@@ -18,8 +18,14 @@ data class Order(
     @get:PropertyName("funcionario_turma") @set:PropertyName("funcionario_turma")
     var employeeClass: String = "",
 
-    @get:PropertyName("") @set:PropertyName("")
-    var payment: String = "",
+    @get:PropertyName("forma_pagamento") @set:PropertyName("forma_pagamento")
+    var payment: String = "PIX",
+
+    @get:PropertyName("valor_recebido") @set:PropertyName("valor_recebido")
+    var receivedValue: Double = 0.0,
+
+    @get:PropertyName("troco") @set:PropertyName("troco")
+    var change: Double = 0.0,
 
     @get:PropertyName("itens") @set:PropertyName("itens")
     var items: List<OrderItem> = emptyList(),
@@ -28,8 +34,3 @@ data class Order(
     var totalValue: Double = 0.0
 
 )
-
-fun Timestamp.toFormattedString(): String {
-    val sdf = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale("pt", "BR"))
-    return sdf.format(this.toDate())
-}
