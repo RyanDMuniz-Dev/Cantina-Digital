@@ -70,6 +70,7 @@ dependencies {
     // Bibliotecas do Firebase
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    implementation(libs.androidx.runtime)
     implementation(libs.firebase.database)
 
     // Suporte para chamadas assíncronas .await() no Kotlin

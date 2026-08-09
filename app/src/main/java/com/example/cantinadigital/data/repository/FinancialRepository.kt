@@ -3,6 +3,7 @@ package com.example.cantinadigital.data.repository
 import com.example.cantinadigital.data.model.FinancialTransaction
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
@@ -13,7 +14,7 @@ class FinancialRepository(
 ) {
 
     fun getTransactions(): Flow<List<FinancialTransaction>> = callbackFlow {
-        val listener = firestore.collection("")
+        val listener = firestore.collection(transactionPath)
             .orderBy("data_hora", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
 
@@ -29,6 +30,8 @@ class FinancialRepository(
                 trySend(transactions)
 
             }
+
+        awaitClose { listener.remove() }
     }
 
     suspend fun addTransaction(transaction: FinancialTransaction): Boolean {
