@@ -1,4 +1,4 @@
-package com.example.cantinadigital.ui.components
+package com.example.cantinadigital.ui.components.cards
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background

@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cantinadigital.data.model.Product
-import com.example.cantinadigital.ui.components.StockItemCard
+import com.example.cantinadigital.ui.components.cards.StockItemCard
 import com.example.cantinadigital.ui.components.forms.AddProductBottomSheet
 import com.example.cantinadigital.ui.components.forms.EditProductBottomSheet
 import com.example.cantinadigital.ui.features.stock.model.AddProductUiState

@@ -5,18 +5,22 @@ import androidx.lifecycle.viewModelScope
 import com.example.cantinadigital.data.model.Order
 import com.example.cantinadigital.data.model.OrderItem
 import com.example.cantinadigital.data.model.Product
+import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.data.repository.OrderRepository
 import com.example.cantinadigital.data.repository.ProductRepository
 import com.example.cantinadigital.ui.features.orders.model.CreateOrderUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CreateOrderViewModel (
     private val orderRepository: OrderRepository = OrderRepository(),
-    private val productRepository: ProductRepository = ProductRepository()
+    private val productRepository: ProductRepository = ProductRepository(),
+    private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
     private val _products = MutableStateFlow<List<Product>>(emptyList())
@@ -28,8 +32,27 @@ class CreateOrderViewModel (
     private val _uiState = MutableStateFlow<CreateOrderUiState>(CreateOrderUiState.Idle)
     val uiState: StateFlow<CreateOrderUiState> = _uiState.asStateFlow()
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _recentOrders = MutableStateFlow<List<Order>>(emptyList())
+    val recentOrders: StateFlow<List<Order>> = _recentOrders.asStateFlow()
+
+    val filteredProducts: StateFlow<List<Product>> = combine(_products, _searchQuery) { products, query ->
+        if (query.isBlank()) {
+            products
+        } else {
+            products.filter {
+                it.nome.contains(query, ignoreCase = true) ||
+                it.emoji.contains(query) ||
+                it.vendedor.contains(query)
+            }
+        }
+    }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
+
     init {
         fetchProducts()
+        fetchOrders()
     }
 
     private fun fetchProducts() {
@@ -39,6 +62,19 @@ class CreateOrderViewModel (
             }
         }
     }
+
+    private fun fetchOrders() {
+        viewModelScope.launch {
+            orderRepository.getOrderFlow().collect { orders ->
+                _recentOrders.value = orders
+            }
+        }
+    }
+
+    fun onSearchQueryChanged(newQuery: String) {
+        _searchQuery.value = newQuery
+    }
+
 
     fun addProductToCart(product: Product) {
         _cartItems.update { currentItems ->
@@ -82,8 +118,6 @@ class CreateOrderViewModel (
     }
 
     fun confirmAndRegisterOrder(
-        employeeName: String,
-        employeeClass: String,
         paymentType: String,
         receivedValue: Double,
         change: Double
@@ -94,13 +128,38 @@ class CreateOrderViewModel (
 
         val total = currentCart.sumOf { it.unitValue * it.amount }
 
-        val newOrder = Order(
-            employeeName = employeeName,
-            employeeClass = employeeClass,
-            payment = paymentType,
+        viewModelScope.launch {
+            _uiState.value = CreateOrderUiState.Loading
 
-        )
+            val userResult = authRepository.getDadosUsuarioLogado()
+            val userData = userResult.getOrNull()
 
+            val employeeName = userData?.get("nome") as? String ?: "Atendente"
+            val employeeClass = userData?.get("turma") as? String ?: "Geral"
+
+            val newOrder = Order(
+                employeeName = employeeName,
+                employeeClass = employeeClass,
+                payment = paymentType,
+                receivedValue = receivedValue,
+                change = change,
+                items = currentCart,
+                totalValue = total
+            )
+
+            val success = orderRepository.createOrder(newOrder)
+            if (success) {
+                _cartItems.value = emptyList()
+                _uiState.value = CreateOrderUiState.Success
+            } else {
+                _uiState.value = CreateOrderUiState.Error("Falha ao registrar pedido")
+            }
+        }
+
+    }
+
+    fun resetUiState() {
+        _uiState.value = CreateOrderUiState.Idle
     }
 
 }
