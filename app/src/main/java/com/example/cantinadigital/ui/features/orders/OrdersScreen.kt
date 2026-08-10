@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -111,7 +112,10 @@ fun OrdersScreen(
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        bottom = 88.dp
+                    )
                 ) {
 
                     groupedOrders.forEach { (headerTitle, ordersInGroup) ->

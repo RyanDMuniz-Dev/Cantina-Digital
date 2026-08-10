@@ -93,7 +93,7 @@ fun StockItemCard(
                         text = item.nome,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Vendedor: ${item.vendedor}",
@@ -112,7 +112,7 @@ fun StockItemCard(
                     text = String.format("R$ %.2f", item.valor),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 // Chip / Badge mostrando a quantidade disponível
@@ -136,7 +136,7 @@ fun StockItemCard(
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "edit: ${item.nome}",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 

@@ -73,7 +73,7 @@ fun OrderItemCard(
                     Text(
                         text = "Total: R$ %.2f • %s".format(order.totalValue, order.payment),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.SemiBold
                     )
                 }

@@ -102,7 +102,7 @@ fun SellerPayoutCard(summary: SellerPayoutSummary) {
                     text = "R$ %.2f".format(summary.liquidValueRepass),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
