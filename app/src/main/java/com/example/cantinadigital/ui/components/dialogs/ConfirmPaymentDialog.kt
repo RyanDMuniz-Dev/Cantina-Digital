@@ -55,6 +55,7 @@ fun ConfirmPaymentDialog(
     } else 0.0
 
     val isPaymentValid = paymentType == "PIX" || (paymentType == "DINHEIRO" && receivedValue >= totalAmount)
+    val total = cartItems.sumOf { it.unitValue * it.amount }
 
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -106,6 +107,12 @@ fun ConfirmPaymentDialog(
                         text = "Total:",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "R$ %.2f".format(total),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }

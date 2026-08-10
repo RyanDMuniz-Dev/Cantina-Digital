@@ -158,6 +158,17 @@ class CreateOrderViewModel (
 
     }
 
+    fun deleteOrder(order: Order) {
+        viewModelScope.launch {
+            val success = orderRepository.deleteOrder(order)
+            if (success) {
+
+            } else {
+                _uiState.value = CreateOrderUiState.Error("Erro ao excluir o pedido")
+            }
+        }
+    }
+
     fun resetUiState() {
         _uiState.value = CreateOrderUiState.Idle
     }

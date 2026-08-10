@@ -127,7 +127,12 @@ fun OrdersScreen(
                         }
 
                         items(ordersInGroup) { order ->
-                            OrderItemCard(order = order)
+                            OrderItemCard(
+                                order = order,
+                                onDeleteOrder = { orderToDelete ->
+                                    viewModel.deleteOrder(orderToDelete)
+                                }
+                            )
                         }
                     }
 

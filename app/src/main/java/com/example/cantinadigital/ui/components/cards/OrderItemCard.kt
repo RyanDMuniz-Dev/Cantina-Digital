@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,10 +22,12 @@ import java.util.TimeZone
 
 @Composable
 fun OrderItemCard(
+    modifier: Modifier = Modifier,
     order: Order,
-    modifier: Modifier = Modifier
+    onDeleteOrder: (Order) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     // Animação de rotação da setinha ao clicar
     val rotationState by animateFloatAsState(
@@ -83,6 +86,15 @@ fun OrderItemCard(
                         modifier = Modifier.rotate(rotationState)
                     )
                 }
+
+                IconButton(onClick = { showDeleteDialog = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Cancelar Pedido",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+
             }
 
             // ---------------- DETALHES COMPLETOS (Aparecem ao Clicar) ----------------
@@ -152,6 +164,30 @@ fun OrderItemCard(
                             )
                         }
                     }
+
+                    if (showDeleteDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showDeleteDialog = false },
+                            title = { Text("Cancelar Pedido?") },
+                            text = { Text("Esta ação excluirá o registro da venda e devolverá os itens ao estoque.") },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        showDeleteDialog = false
+                                        onDeleteOrder(order)
+                                    }
+                                ) {
+                                    Text("Sim, Excluir", color = MaterialTheme.colorScheme.error)
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showDeleteDialog = false }) {
+                                    Text("Cancelar")
+                                }
+                            }
+                        )
+                    }
+
                 }
             }
         }

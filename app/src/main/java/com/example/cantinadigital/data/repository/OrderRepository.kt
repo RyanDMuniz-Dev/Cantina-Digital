@@ -3,12 +3,13 @@ package com.example.cantinadigital.data.repository
 import com.example.cantinadigital.data.model.Order
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
-class OrderRepository (
+class OrderRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val ordersPath: String = "pedidos",
     private val productsPath: String = "produtos"
@@ -16,7 +17,7 @@ class OrderRepository (
 
     fun getOrderFlow(): Flow<List<Order>> = callbackFlow {
         val listener = firestore.collection(ordersPath)
-            .orderBy("data_hora", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .orderBy("data_hora", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
@@ -33,19 +34,30 @@ class OrderRepository (
         awaitClose { listener.remove() }
     }
 
-    suspend fun createOrder(order: Order) : Boolean {
+    suspend fun createOrder(order: Order): Boolean {
         return try {
             firestore.runTransaction { transaction ->
+                // 1º PASSO: Fazer TODAS as leituras (transaction.get) primeiro
+                val updates = mutableListOf<Pair<com.google.firebase.firestore.DocumentReference, Long>>()
+
                 for (item in order.items) {
                     if (item.productId.isNotBlank()) {
                         val productRef = firestore.collection(productsPath).document(item.productId)
                         val snapshot = transaction.get(productRef)
 
-                        val currentAmount = snapshot.getLong("quantidade") ?: 0L
-                        val newAmount = (currentAmount - item.amount).coerceAtLeast(0)
-
-                        transaction.update(productRef, "quantidade", newAmount)
+                        if (snapshot.exists()) {
+                            val currentAmount = snapshot.getLong("quantidade")
+                                ?: snapshot.getLong("quantidadeEstoque")
+                                ?: 0L
+                            val newAmount = (currentAmount - item.amount).coerceAtLeast(0)
+                            updates.add(Pair(productRef, newAmount))
+                        }
                     }
+                }
+
+                // 2º PASSO: Fazer TODAS as escritas (transaction.update e transaction.set) no final
+                for ((ref, newAmount) in updates) {
+                    transaction.update(ref, "quantidade", newAmount)
                 }
 
                 val newOrderRef = firestore.collection(ordersPath).document()
@@ -56,6 +68,7 @@ class OrderRepository (
 
                 transaction.set(newOrderRef, orderWithDetails)
             }.await()
+
             true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -63,5 +76,29 @@ class OrderRepository (
         }
     }
 
+    suspend fun deleteOrder(order: Order): Boolean {
+        return try {
+            firestore.collection(ordersPath).document(order.id).delete().await()
 
+            // Devolve o estoque de cada item
+            for (item in order.items) {
+                if (item.productId.isNotBlank()) {
+                    val productRef = firestore.collection(productsPath).document(item.productId)
+                    firestore.runTransaction { transaction ->
+                        val snapshot = transaction.get(productRef)
+                        if (snapshot.exists()) {
+                            val currentStock = snapshot.getLong("quantidade")
+                                ?: snapshot.getLong("quantidadeEstoque")
+                                ?: 0L
+                            transaction.update(productRef, "quantidade", currentStock + item.amount)
+                        }
+                    }.await()
+                }
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 }
