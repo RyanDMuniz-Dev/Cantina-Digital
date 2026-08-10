@@ -177,7 +177,7 @@ fun CreateOrderDialog(
                         text = "R$ %.2f".format(totalAmount),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
