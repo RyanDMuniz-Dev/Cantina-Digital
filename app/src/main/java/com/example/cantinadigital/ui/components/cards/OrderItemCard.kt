@@ -87,6 +87,7 @@ fun OrderItemCard(
                     )
                 }
 
+                // Ícone da Lixeira
                 IconButton(onClick = { showDeleteDialog = true }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -94,7 +95,6 @@ fun OrderItemCard(
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
-
             }
 
             // ---------------- DETALHES COMPLETOS (Aparecem ao Clicar) ----------------
@@ -164,32 +164,32 @@ fun OrderItemCard(
                             )
                         }
                     }
-
-                    if (showDeleteDialog) {
-                        AlertDialog(
-                            onDismissRequest = { showDeleteDialog = false },
-                            title = { Text("Cancelar Pedido?") },
-                            text = { Text("Esta ação excluirá o registro da venda e devolverá os itens ao estoque.") },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        showDeleteDialog = false
-                                        onDeleteOrder(order)
-                                    }
-                                ) {
-                                    Text("Sim, Excluir", color = MaterialTheme.colorScheme.error)
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = { showDeleteDialog = false }) {
-                                    Text("Cancelar")
-                                }
-                            }
-                        )
-                    }
-
                 }
             }
         }
+    }
+
+    // ✅ CORREÇÃO: O AlertDialog agora fica FORA da AnimatedVisibility!
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Canceler Pedido?") },
+            text = { Text("Esta ação exclui o registro da venda e devolverá os itens ao estoque.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDeleteOrder(order)
+                    }
+                ) {
+                    Text("Sim, Excluir", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }

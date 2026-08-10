@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cantinadigital.R
 import com.example.cantinadigital.data.model.Product
+import com.example.cantinadigital.ui.components.buttons.PrimaryLoadingButton
 import com.example.cantinadigital.ui.components.fields.SimpleFormTextField
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
@@ -33,6 +34,7 @@ import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 @Composable
 fun AddProductBottomSheet(
     modifier: Modifier = Modifier,
+    isLoading: Boolean,
     onDismissRequest: () -> Unit,
     onConfirmRequest: (Product) -> Unit
 ) {
@@ -183,8 +185,10 @@ fun AddProductBottomSheet(
             }
 
             // Botão de Salvar
-            Button(
+            PrimaryLoadingButton(
                 modifier = Modifier.fillMaxWidth(),
+                text = "Cadastrar Produto",
+                isLoading = isLoading,
                 enabled = isFormValid,
                 onClick = {
                     val sanitizedValue = valor.replace(",", ".").toDoubleOrNull() ?: 0.0
@@ -202,10 +206,7 @@ fun AddProductBottomSheet(
                     )
                     onConfirmRequest(newProduct)
                 },
-            ) {
-                Text("Cadastrar Produto")
-            }
-
+            )
         }
 
     }
@@ -217,7 +218,8 @@ private fun AddProductBottomSheetPreview() {
     CantinaDigitalTheme {
         AddProductBottomSheet(
             onDismissRequest = {},
-            onConfirmRequest = {}
+            onConfirmRequest = {},
+            isLoading = false
         )
     }
 }

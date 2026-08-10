@@ -182,6 +182,7 @@ fun StockContent(
 
             if (showAddBottomSheet) {
                 AddProductBottomSheet(
+                    isLoading = isSavingProduct,
                     onDismissRequest = onDismissBottomSheet,
                     onConfirmRequest = onConfirmAddProduct
                 )

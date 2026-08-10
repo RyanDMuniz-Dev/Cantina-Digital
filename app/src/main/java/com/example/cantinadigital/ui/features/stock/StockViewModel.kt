@@ -34,6 +34,9 @@ class StockViewModel(
         )
 
     fun addProduct(product: Product) {
+
+        if (_addProductState.value is AddProductUiState.Loading) return
+
         viewModelScope.launch {
             _addProductState.value = AddProductUiState.Loading
 

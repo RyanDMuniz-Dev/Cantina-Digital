@@ -36,11 +36,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.cantinadigital.data.model.OrderItem
+import com.example.cantinadigital.ui.components.buttons.PrimaryLoadingButton
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 @Composable
 fun ConfirmPaymentDialog(
     cartItems: List<OrderItem>,
+    isLoading: Boolean,
     onDismissRequest: () -> Unit,
     onConfirmPayment: (paymentType: String, receivedValue: Double, change: Double) -> Unit
 ) {
@@ -179,7 +181,9 @@ fun ConfirmPaymentDialog(
                         Text("Voltar")
                     }
 
-                    Button(
+                    PrimaryLoadingButton(
+                        text = "Confirmar",
+                        isLoading = isLoading,
                         onClick = {
                             onConfirmPayment(
                                 paymentType,
@@ -188,10 +192,8 @@ fun ConfirmPaymentDialog(
                             )
                         },
                         modifier = Modifier.weight(1f),
-                        enabled = isPaymentValid
-                    ) {
-                        Text("Confirmar")
-                    }
+                        enabled = cartItems.isNotEmpty()
+                    )
                 }
 
             }
@@ -215,7 +217,8 @@ private fun ConfirmPaymentDialogPreview() {
             onDismissRequest = {},
             onConfirmPayment = { paymentType, receivedValue, change ->
 
-            }
+            },
+            isLoading = false
         )
     }
 }

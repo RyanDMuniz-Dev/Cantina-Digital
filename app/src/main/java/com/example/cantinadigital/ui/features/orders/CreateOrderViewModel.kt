@@ -123,6 +123,8 @@ class CreateOrderViewModel (
         change: Double
     ) {
 
+        if (_uiState.value == CreateOrderUiState.Loading) return
+
         val currentCart = _cartItems.value
         if (currentCart.isEmpty()) return
 

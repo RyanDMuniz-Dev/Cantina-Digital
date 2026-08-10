@@ -165,6 +165,7 @@ fun OrdersScreen(
             if (showConfirmPaymentDialog) {
                 ConfirmPaymentDialog(
                     cartItems = cartItems,
+                    isLoading = uiState is CreateOrderUiState.Loading,
                     onDismissRequest = {
                         showConfirmPaymentDialog = false
                         showCreateOrderDialog = true
