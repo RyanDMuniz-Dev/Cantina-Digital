@@ -34,77 +34,114 @@ fun SellerPayoutCard(
     summary: SellerPayoutSummary,
     onConfirmPayoutSummary: (SellerPayoutSummary) -> Unit = {}
 ) {
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 2.dp
+            )
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Nome do Vendedor / Aluno
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement =
+                    Arrangement.SpaceBetween,
+                verticalAlignment =
+                    Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+
                     Text(
                         text = "👤 ${summary.sellerName}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        style =
+                            MaterialTheme.typography.titleMedium,
+                        fontWeight =
+                            FontWeight.Bold
                     )
+
                     Text(
-                        text = summary.weekLabel,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = summary.statusLabel,
+                        style =
+                            MaterialTheme.typography.bodySmall,
+                        color =
+                            MaterialTheme.colorScheme
+                                .onSurfaceVariant
                     )
                 }
-                // aqui
+
                 AssistChip(
-                    onClick = {  },
+                    onClick = {},
                     label = {
                         Text(
-                            text = if (summary.isPaid) "Pago" else "Pendente",
+                            text =
+                                if (summary.isPaid)
+                                    "Pago"
+                                else
+                                    "Pendente",
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.labelSmall
                         )
                     },
+
                     colors = AssistChipDefaults.assistChipColors(
-                        containerColor = if (summary.isPaid) Color(0xFFE8F5E9) else Color(0xFFFFF3E0),
-                        labelColor = if (summary.isPaid) Color(0xFF2E7D32) else Color(0xFFE65100)
+
+                        containerColor =
+                            if (summary.isPaid)
+                                Color(0xFFE8F5E9)
+                            else
+                                Color(0xFFFFF3E0),
+
+                        labelColor =
+                            if (summary.isPaid)
+                                Color(0xFF2E7D32)
+                            else
+                                Color(0xFFE65100)
                     )
                 )
-
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Lista compacta dos itens dele vendidos
             summary.itemsSold.forEach { (itemNome, qtd) ->
                 Text(
                     text = "• $qtd x $itemNome",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme
+                        .onSurfaceVariant
                 )
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(
+                        vertical = 10.dp
+                    )
+            )
 
-            // Detalhamento do Cálculo de Repasse
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+
                 Text(
                     text = "Total Vendido (Bruto):",
                     style = MaterialTheme.typography.bodySmall
                 )
+
                 Text(
-                    text = "R$ %.2f".format(summary.grossTotal),
+                    text = "R$ %.2f".format(
+                            summary.grossTotal
+                        ),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -112,15 +149,20 @@ fun SellerPayoutCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement =
+                    Arrangement.SpaceBetween
             ) {
+
                 Text(
                     text = "(-) Taxa Cantina Retida:",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )
+
                 Text(
-                    text = "R$ %.2f".format(summary.cantinaTax),
+                    text = "R$ %.2f".format(
+                            summary.cantinaTax
+                        ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.SemiBold
@@ -129,42 +171,59 @@ fun SellerPayoutCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Valor Líquido a Transferir no Pix/Dinheiro
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 Text(
                     text = "Valor a Pagar ao Aluno:",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
+
                 Text(
-                    text = "R$ %.2f".format(summary.liquidValueRepass),
+                    text = "R$ %.2f".format(
+                            summary.liquidValueRepass
+                        ),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontWeight = FontWeight.Bold
                 )
             }
 
             if (!summary.isPaid) {
-                Spacer(modifier = Modifier.height(12.dp))
+
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
                 Button(
-                    onClick = { onConfirmPayoutSummary(summary) },
+                    onClick = {
+                        onConfirmPayoutSummary(
+                            summary
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
                 ) {
+
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Confirmar Repasse Realizado")
+
+                    Spacer(
+                        modifier = Modifier.width(8.dp)
+                    )
+
+                    Text(
+                        text =
+                            "Confirmar Repasse Realizado"
+                    )
                 }
             }
-
         }
     }
 }
