@@ -28,6 +28,8 @@ import com.example.cantinadigital.R
 import com.example.cantinadigital.data.model.Product
 import com.example.cantinadigital.ui.components.buttons.PrimaryLoadingButton
 import com.example.cantinadigital.ui.components.fields.SimpleFormTextField
+import com.example.cantinadigital.ui.components.selectors.SelectorBox
+import com.example.cantinadigital.ui.features.signup.model.ThirdYearClass
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +45,7 @@ fun AddProductBottomSheet(
     var nome by remember { mutableStateOf("") }
     var valor by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("") }
+    var sala by remember { mutableStateOf("") }
 
     var vendedor by remember { mutableStateOf("") }
     var isProductCantina by remember { mutableStateOf(true) }
@@ -156,23 +159,36 @@ fun AddProductBottomSheet(
             }
 
             if (!isProductCantina) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SimpleFormTextField(
-                        modifier = Modifier.weight(0.6f),
-                        value = vendedor,
-                        label = R.string.vendedor,
-                        singleLine = true,
-                        onValueChanged = { vendedor = it },
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            imeAction = ImeAction.Next
+                Column {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SimpleFormTextField(
+                            modifier = Modifier.weight(0.7f),
+                            value = vendedor,
+                            label = R.string.vendedor,
+                            singleLine = true,
+                            onValueChanged = { vendedor = it },
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Next
+                            )
                         )
-                    )
+
+                        SelectorBox(
+                            modifier = Modifier.weight(0.3f),
+                            classList = listOf("W", "X", "Y"),
+                            selectedClass = ThirdYearClass.W,
+                            onClassSelected = {
+                                sala = it
+                            }
+                        )
+
+                    }
 
                     SimpleFormTextField(
-                        modifier = Modifier.weight(0.4f),
+                        modifier = Modifier.fillMaxWidth(),
                         value = cantinaTax,
                         label = R.string.tax,
                         singleLine = true,
@@ -181,6 +197,7 @@ fun AddProductBottomSheet(
                             imeAction = ImeAction.Done
                         )
                     )
+
                 }
             }
 
@@ -195,6 +212,7 @@ fun AddProductBottomSheet(
                     val sanitizedAmount = quantidade.trim().toIntOrNull() ?: 0
                     val sanitizedTax = if (isProductCantina) 0.0 else (cantinaTax.replace(",", ".").trim().toDoubleOrNull() ?: 0.0)
                     val sanitizedSeller = if (isProductCantina) "Cantina" else vendedor.trim()
+                    val sanitizedClass = sala.trim().uppercase()
 
                     val newProduct = Product(
                         emoji = emoji.ifBlank { "📦" },
@@ -202,6 +220,7 @@ fun AddProductBottomSheet(
                         valor = sanitizedValue,
                         quantidade = sanitizedAmount,
                         vendedor = sanitizedSeller,
+                        sala = sanitizedClass,
                         cantinaTaxa = sanitizedTax
                     )
                     onConfirmRequest(newProduct)

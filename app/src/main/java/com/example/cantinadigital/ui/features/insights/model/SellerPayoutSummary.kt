@@ -6,6 +6,8 @@ data class SellerPayoutSummary(
 
     val sellerName: String,
 
+    val sellerClass: String, // adicionei essa linha para garantir que saiba se qual sala o vendedor é
+
     val statusLabel: String = "Repasse pendente",
 
     val isPaid: Boolean = false,

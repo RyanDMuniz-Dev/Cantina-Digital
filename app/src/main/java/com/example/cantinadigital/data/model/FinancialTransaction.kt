@@ -24,7 +24,11 @@ data class FinancialTransaction(
 
     @get:PropertyName("funcionario_nome")
     @set:PropertyName("funcionario_nome")
-    var funcionarioNome: String = "",
+    var funcionarioNome: String = "", // adicionei para identificar quem de qual sala fez a transação
+
+    @get:PropertyName("funcionario_sala")
+    @set:PropertyName("funcionario_sala")
+    var funcionarioSala: String = "",
 
     @get:PropertyName("data_hora")
     @set:PropertyName("data_hora")

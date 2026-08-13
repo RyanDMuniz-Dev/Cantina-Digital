@@ -92,6 +92,7 @@ class CreateOrderViewModel (
                     amount = 1,
                     unitValue = product.valor,
                     vendedor = product.vendedor,
+                    sala = product.sala,
                     taxaCantina = product.cantinaTaxa
                 )
             }

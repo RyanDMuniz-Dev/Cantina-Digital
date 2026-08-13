@@ -6,6 +6,7 @@ import com.example.cantinadigital.data.model.FinancialTransaction
 import com.example.cantinadigital.data.model.Order
 import com.example.cantinadigital.data.model.Payout
 import com.example.cantinadigital.data.model.PayoutProduct
+import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.data.repository.FinancialRepository
 import com.example.cantinadigital.data.repository.OrderRepository
 import com.example.cantinadigital.data.repository.PayoutAlreadyConfirmedException
@@ -21,7 +22,8 @@ import kotlinx.coroutines.launch
 class InsightsViewModel(
     private val orderRepository: OrderRepository = OrderRepository(),
     private val financialRepository: FinancialRepository = FinancialRepository(),
-    private val payoutRepository: PayoutRepository = PayoutRepository()
+    private val payoutRepository: PayoutRepository = PayoutRepository(),
+    private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
     private val _uiState =
@@ -29,6 +31,10 @@ class InsightsViewModel(
 
     val uiState: StateFlow<InsightsUiState> =
         _uiState.asStateFlow()
+
+    private val _employeeInfo = MutableStateFlow("")
+
+    val employeeInfo: StateFlow<String> = _employeeInfo.asStateFlow()
 
     init {
         loadData()
@@ -250,56 +256,53 @@ class InsightsViewModel(
         )
     }
 
-    suspend fun confirmPayout(
-        summary: SellerPayoutSummary,
-        funcionarioId: String,
-        funcionarioNome: String
-    ): Result<Unit> {
+    fun confirmPayout(summary: SellerPayoutSummary) {
+        viewModelScope.launch {
 
-        if (funcionarioNome.isBlank()) {
-            return Result.failure(
-                IllegalArgumentException(
-                    "Nome do funcionário não identificado."
-                )
+            val userResult =
+                authRepository.getDadosUsuarioLogado()
+
+            val userData =
+                userResult.getOrNull()
+
+            val employeeName =
+                userData?.get("nome") as? String
+                    ?: "Atendente"
+
+            val employeeId =
+                userData?.get("uid") as? String
+                    ?: ""
+
+            val payout = Payout(
+                vendedor = summary.sellerName,
+                valorBruto = summary.grossTotal,
+                taxaCantina = summary.cantinaTax,
+                valorRepassado = summary.liquidValueRepass,
+                produtos = summary.payoutProducts,
+                funcionarioId = employeeId,
+                funcionarioNome = employeeName
             )
+
+            payoutRepository.createPayout(payout)
+
+        }
+    }
+
+    fun getEmployeeInfo() {
+
+        viewModelScope.launch {
+
+            val userResult = authRepository.getDadosUsuarioLogado()
+
+            val userData = userResult.getOrNull()
+
+            val employeeName = userData?.get("nome") as? String
+            val employeeClass = userData?.get("turma") as? String
+
+            _employeeInfo.value = "$employeeName $employeeClass".trim()
+
         }
 
-        if (summary.payoutProducts.isEmpty()) {
-            return Result.failure(
-                IllegalArgumentException(
-                    "Não existem produtos pendentes para este repasse."
-                )
-            )
-        }
-
-        val payout =
-            Payout(
-
-                vendedor =
-                    summary.sellerName,
-
-                valorBruto =
-                    summary.grossTotal,
-
-                taxaCantina =
-                    summary.cantinaTax,
-
-                valorRepassado =
-                    summary.liquidValueRepass,
-
-                produtos =
-                    summary.payoutProducts,
-
-                funcionarioId =
-                    funcionarioId,
-
-                funcionarioNome =
-                    funcionarioNome
-            )
-
-        return payoutRepository.createPayout(
-            payout
-        )
     }
 
     fun addFinancialTransaction(

@@ -37,16 +37,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cantinadigital.ui.components.cards.MetricCard
 import com.example.cantinadigital.ui.components.cards.SellerPayoutCard
 import com.example.cantinadigital.ui.components.dialogs.AddTransactionDialog
+import com.example.cantinadigital.ui.components.dialogs.ConfirmPayoutDialog
+import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 @Composable
 fun InsightsScreen(
     modifier: Modifier = Modifier,
-    viewModel: InsightsViewModel = viewModel()
+    viewModel: InsightsViewModel = viewModel(),
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
     var showAddTransactionDialog by remember { mutableStateOf(false) }
+    var selectPayoutForConfimation by remember { mutableStateOf<SellerPayoutSummary?>(null) }
+
+    val employeeInfo by viewModel.employeeInfo.collectAsState()
 
     Scaffold(
         modifier = modifier,
@@ -156,8 +161,16 @@ fun InsightsScreen(
                         }
                     } else {
                         items(uiState.sellersRoyalties) { summary ->
-                            SellerPayoutCard(summary = summary)
+                            SellerPayoutCard(
+                                summary = summary,
+                                onConfirmPayoutSummary = {
+                                    selectPayoutForConfimation = summary
+                                }
+                            )
                         }
+
+                        
+
                     }
                 }
             }

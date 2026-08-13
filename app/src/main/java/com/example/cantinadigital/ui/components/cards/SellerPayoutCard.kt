@@ -32,7 +32,7 @@ import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
 @Composable
 fun SellerPayoutCard(
     summary: SellerPayoutSummary,
-    onConfirmPayoutSummary: (SellerPayoutSummary) -> Unit = {}
+    onConfirmPayoutSummary: () -> Unit
 ) {
 
     Card(
@@ -62,13 +62,26 @@ fun SellerPayoutCard(
                     modifier = Modifier.weight(1f)
                 ) {
 
-                    Text(
-                        text = "👤 ${summary.sellerName}",
-                        style =
-                            MaterialTheme.typography.titleMedium,
-                        fontWeight =
-                            FontWeight.Bold
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Text(
+                            text = "👤 ${summary.sellerName}",
+                            style =
+                                MaterialTheme.typography.titleMedium,
+                            fontWeight =
+                                FontWeight.Bold
+                        )
+
+                        Text(
+                            text = summary.sellerClass,
+                            style =
+                                MaterialTheme.typography.titleMedium,
+                            fontWeight =
+                                FontWeight.Bold
+                        )
+
+                    }
 
                     Text(
                         text = summary.statusLabel,
@@ -200,9 +213,7 @@ fun SellerPayoutCard(
 
                 Button(
                     onClick = {
-                        onConfirmPayoutSummary(
-                            summary
-                        )
+                        onConfirmPayoutSummary()
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
