@@ -21,25 +21,27 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cantinadigital.ui.components.cards.ConfirmedPayoutCard
 import com.example.cantinadigital.ui.components.cards.MetricCard
 import com.example.cantinadigital.ui.components.cards.SellerPayoutCard
 import com.example.cantinadigital.ui.components.dialogs.AddTransactionDialog
 import com.example.cantinadigital.ui.components.dialogs.ConfirmPayoutDialog
 import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
-import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 @Composable
 fun InsightsScreen(
@@ -52,6 +54,9 @@ fun InsightsScreen(
     var selectPayoutForConfimation by remember { mutableStateOf<SellerPayoutSummary?>(null) }
 
     val employeeInfo by viewModel.employeeInfo.collectAsState()
+
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("A confirmar", "Repassados")
 
     Scaffold(
         modifier = modifier,
@@ -90,7 +95,6 @@ fun InsightsScreen(
                     contentPadding = PaddingValues(bottom = 88.dp)
                 ) {
 
-                    // Main data
                     item {
                         Row(
                             modifier = Modifier.fillMaxSize(),
@@ -140,34 +144,62 @@ fun InsightsScreen(
                         }
                     }
 
+                    // 1. Componente de Abas exatamente na posição indicada!
                     item {
-                        Text(
-                            text = "Repasses por Vendedor / Aluno",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                        TabRow(
+                            selectedTabIndex = selectedTabIndex,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            tabs.forEachIndexed { index, title ->
+                                Tab(
+                                    selected = selectedTabIndex == index,
+                                    onClick = { selectedTabIndex = index },
+                                    text = { Text(text = title) }
+                                )
+                            }
+                        }
                     }
 
-                    if (uiState.sellersRoyalties.isEmpty()) {
-                        item {
-                            Text(
-                                text = "Nenhum produto de terceiro/aluno foi vendido ainda!",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                    // 2. Renderização de acordo com a aba selecionada
+                    if (selectedTabIndex == 0) {
+                        // ABA: A CONFIRMAR (PENDENTES)
+                        if (uiState.sellersRoyalties.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "Nenhum repasse pendente momento!",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(vertical = 16.dp)
+                                )
+                            }
+                        } else {
+                            items(uiState.sellersRoyalties) { summary ->
+                                SellerPayoutCard(
+                                    summary = summary,
+                                    onConfirmPayoutSummary = {
+                                        selectPayoutForConfimation = summary
+                                    }
+                                )
+                            }
                         }
                     } else {
-                        items(uiState.sellersRoyalties) { summary ->
-                            SellerPayoutCard(
-                                summary = summary,
-                                onConfirmPayoutSummary = {
-                                    selectPayoutForConfimation = summary
-                                }
-                            )
+                        // ABA: REPASSADOS (HISTÓRICO)
+                        if (uiState.confirmedPayouts.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "Nenhum repasse foi realizado ainda.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(vertical = 16.dp)
+                                )
+                            }
+                        } else {
+                            items(uiState.confirmedPayouts) { payout ->
+                                ConfirmedPayoutCard(payout = payout)
+                            }
                         }
                     }
-                }
+                } // end lazy column
             }
         }
 
