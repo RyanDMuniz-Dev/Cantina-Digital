@@ -38,6 +38,7 @@ class InsightsViewModel(
 
     init {
         loadData()
+        getEmployeeInfo()
     }
 
     private fun loadData() {
@@ -81,16 +82,17 @@ class InsightsViewModel(
         val sellerTax =
             mutableMapOf<String, Double>()
 
+        // Mapeia a sala/turma correspondente a cada vendedor
+        val sellerClassMap =
+            mutableMapOf<String, String>()
+
         /*
          * Cada item já repassado vira uma chave:
-         *
          * pedidoId + vendedor
          */
         val paidKeys = payouts
             .flatMap { payout ->
-
                 payout.produtos.map { product ->
-
                     createPayoutKey(
                         orderId = product.pedidoId,
                         sellerName = payout.vendedor
@@ -123,6 +125,11 @@ class InsightsViewModel(
                 val seller =
                     item.vendedor.trim()
 
+                // Salva a sala do vendedor (caso ainda não esteja salva)
+                if (item.sala.isNotBlank()) {
+                    sellerClassMap[seller] = item.sala
+                }
+
                 val taxPercent =
                     item.taxaCantina / 100.0
 
@@ -131,14 +138,12 @@ class InsightsViewModel(
 
                 /*
                  * Receita histórica da Cantina.
-                 *
                  * Continua considerando todas as vendas.
                  */
                 cantinaRoyalties += taxValue
 
                 /*
-                 * Verificamos especificamente
-                 * pedido + vendedor.
+                 * Verificamos especificamente pedido + vendedor.
                  */
                 val payoutKey =
                     createPayoutKey(
@@ -225,7 +230,6 @@ class InsightsViewModel(
                     products
                         .groupBy { it.nome }
                         .map { (name, list) ->
-
                             Pair(
                                 name,
                                 list.sumOf {
@@ -236,6 +240,7 @@ class InsightsViewModel(
 
                 SellerPayoutSummary(
                     sellerName = seller,
+                    sellerClass = sellerClassMap[seller] ?: "", // Passando o novo parâmetro obrigatório
                     statusLabel = "Repasse pendente",
                     isPaid = false,
                     itemsSold = groupedProducts,
@@ -252,6 +257,7 @@ class InsightsViewModel(
             totalExits = totalExits,
             totalBalance = balance,
             sellersRoyalties = repassesList,
+            confirmedPayouts = payouts,
             isLoading = false
         )
     }
@@ -259,19 +265,11 @@ class InsightsViewModel(
     fun confirmPayout(summary: SellerPayoutSummary) {
         viewModelScope.launch {
 
-            val userResult =
-                authRepository.getDadosUsuarioLogado()
+            val userResult = authRepository.getDadosUsuarioLogado()
+            val userData = userResult.getOrNull()
 
-            val userData =
-                userResult.getOrNull()
-
-            val employeeName =
-                userData?.get("nome") as? String
-                    ?: "Atendente"
-
-            val employeeId =
-                userData?.get("uid") as? String
-                    ?: ""
+            val employeeName = userData?.get("nome") as? String ?: "Atendente"
+            val employeeId = userData?.get("uid") as? String ?: ""
 
             val payout = Payout(
                 vendedor = summary.sellerName,
@@ -280,11 +278,11 @@ class InsightsViewModel(
                 valorRepassado = summary.liquidValueRepass,
                 produtos = summary.payoutProducts,
                 funcionarioId = employeeId,
-                funcionarioNome = employeeName
+                funcionarioNome = employeeName,
+                dataHora = com.google.firebase.Timestamp.now() // <-- Garante que a data/hora seja gravada!
             )
 
             payoutRepository.createPayout(payout)
-
         }
     }
 

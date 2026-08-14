@@ -62,7 +62,7 @@ fun InsightsScreen(
                 text = { Text("Lançar Caixa") }
             )
         }
-    ) {innerPadding ->
+    ) { innerPadding ->
 
         Column(
             modifier = Modifier
@@ -80,16 +80,14 @@ fun InsightsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (uiState.isLoading) {
-                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(
-                        bottom = 88.dp
-                    )
+                    contentPadding = PaddingValues(bottom = 88.dp)
                 ) {
 
                     // Main data
@@ -168,14 +166,12 @@ fun InsightsScreen(
                                 }
                             )
                         }
-
-                        
-
                     }
                 }
             }
         }
 
+        // Diálogo para lançamento de movimentação de caixa
         if (showAddTransactionDialog) {
             AddTransactionDialog(
                 onDismissRequest = { showAddTransactionDialog = false },
@@ -186,14 +182,18 @@ fun InsightsScreen(
             )
         }
 
-    }
-
-}
-
-@Preview
-@Composable
-private fun InsightsScreenPreview() {
-    CantinaDigitalTheme {
-
+        // Diálogo de confirmação de repasse
+        selectPayoutForConfimation?.let { summary ->
+            ConfirmPayoutDialog(
+                summary = summary,
+                isProcessing = uiState.isProcessingPayout,
+                funcionarioNome = employeeInfo,
+                onDismissRequest = { selectPayoutForConfimation = null },
+                onConfirm = {
+                    viewModel.confirmPayout(summary)
+                    selectPayoutForConfimation = null
+                }
+            )
+        }
     }
 }

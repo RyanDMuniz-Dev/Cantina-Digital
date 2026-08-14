@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -45,7 +44,11 @@ fun AddProductBottomSheet(
     var nome by remember { mutableStateOf("") }
     var valor by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("") }
-    var sala by remember { mutableStateOf("") }
+
+    // 1. Declare os estados no topo do Composable:
+    // Estado do Enum para o SelectorBox exibir a seleção
+    var selectedClassEnum by remember { mutableStateOf(ThirdYearClass.W) }
+    var sala by remember { mutableStateOf(selectedClassEnum.name) }
 
     var vendedor by remember { mutableStateOf("") }
     var isProductCantina by remember { mutableStateOf(true) }
@@ -159,11 +162,15 @@ fun AddProductBottomSheet(
             }
 
             if (!isProductCantina) {
-                Column {
+                Column(
+                    verticalArrangement = Arrangement.Center
+                )
+                {
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.Top // 1. Alinha todos os elementos pelo topo
                     ) {
                         SimpleFormTextField(
                             modifier = Modifier.weight(0.7f),
@@ -177,18 +184,22 @@ fun AddProductBottomSheet(
                         )
 
                         SelectorBox(
-                            modifier = Modifier.weight(0.3f),
+                            modifier = Modifier
+                                .weight(0.3f)
+                                .padding(top = 13.dp), // 2. Desce o caixa do Selector em 8dp para emparelhar com a borda do TextField
                             classList = listOf("W", "X", "Y"),
-                            selectedClass = ThirdYearClass.W,
-                            onClassSelected = {
-                                sala = it
+                            selectedClass = selectedClassEnum,
+                            onClassSelected = { selectedString ->
+                                sala = selectedString
+                                selectedClassEnum = runCatching {
+                                    ThirdYearClass.valueOf(selectedString)
+                                }.getOrDefault(ThirdYearClass.W)
                             }
                         )
-
                     }
 
                     SimpleFormTextField(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(),
                         value = cantinaTax,
                         label = R.string.tax,
                         singleLine = true,

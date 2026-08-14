@@ -202,23 +202,23 @@ fun ConfirmPaymentDialog(
 
 }
 
-@Preview (showBackground = true, showSystemUi = true)
-@Composable
-private fun ConfirmPaymentDialogPreview() {
-
-    val sampleItems = listOf(
-        OrderItem("123", "Azedinho", 1, 1.5, "Cantina", 0.0),
-        OrderItem("456", "Coca-Cola Zero", 2, 3.5, "Cantina", 0.0)
-    )
-
-    CantinaDigitalTheme {
-        ConfirmPaymentDialog(
-            cartItems = sampleItems,
-            onDismissRequest = {},
-            onConfirmPayment = { paymentType, receivedValue, change ->
-
-            },
-            isLoading = false
-        )
-    }
-}
+//@Preview (showBackground = true, showSystemUi = true)
+//@Composable
+//private fun ConfirmPaymentDialogPreview() {
+//
+//    val sampleItems = listOf(
+//        OrderItem("123", "Azedinho", 1, 1.5, "Cantina", 0.0),
+//        OrderItem("456", "Coca-Cola Zero", 2, 3.5, "Cantina", 0.0)
+//    )
+//
+//    CantinaDigitalTheme {
+//        ConfirmPaymentDialog(
+//            cartItems = sampleItems,
+//            onDismissRequest = {},
+//            onConfirmPayment = { paymentType, receivedValue, change ->
+//
+//            },
+//            isLoading = false
+//        )
+//    }
+//}

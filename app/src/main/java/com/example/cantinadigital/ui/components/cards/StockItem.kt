@@ -100,6 +100,11 @@ fun StockItemCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
+                    Text(
+                        text = "Sala: 3º${item.sala}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
                 }
             }
 
@@ -153,6 +158,7 @@ private fun StockItemPreview() {
                 nome = "Pirulito",
                 emoji = "🍭",
                 vendedor = "Cantina",
+                sala = "Y",
                 quantidade = 20,
                 valor = 2.30
             ),
