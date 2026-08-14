@@ -9,7 +9,6 @@ import com.example.cantinadigital.data.model.PayoutProduct
 import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.data.repository.FinancialRepository
 import com.example.cantinadigital.data.repository.OrderRepository
-import com.example.cantinadigital.data.repository.PayoutAlreadyConfirmedException
 import com.example.cantinadigital.data.repository.PayoutRepository
 import com.example.cantinadigital.ui.features.insights.model.InsightsUiState
 import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary

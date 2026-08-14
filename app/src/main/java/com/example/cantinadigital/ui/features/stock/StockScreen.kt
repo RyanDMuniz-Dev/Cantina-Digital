@@ -159,7 +159,6 @@ fun StockContent(
                         bottom = 88.dp
                     )
                 ) {
-
                     items(
                         items = products,
                         key = { product -> product.id }
@@ -169,7 +168,6 @@ fun StockContent(
                             onEditClick = onEditClick
                         )
                     }
-
                 }
 
                 if (isSavingProduct) {

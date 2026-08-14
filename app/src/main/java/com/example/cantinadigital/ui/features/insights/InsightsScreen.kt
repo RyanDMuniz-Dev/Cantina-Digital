@@ -154,7 +154,7 @@ fun InsightsScreen(
                                 Tab(
                                     selected = selectedTabIndex == index,
                                     onClick = { selectedTabIndex = index },
-                                    text = { Text(text = title) }
+                                    text = { Text(text = title, color = MaterialTheme.colorScheme.onPrimaryContainer) }
                                 )
                             }
                         }
