@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cantinadigital.codigoCalculadora.Calculadora
 import com.example.cantinadigital.data.remote.FirebaseProvider
 import com.example.cantinadigital.ui.features.home.HomeScreen
 import com.example.cantinadigital.ui.features.login.LoginScreen
@@ -23,6 +24,7 @@ sealed class Screen(
     object SignUp : Screen("signup")
     object Login : Screen("login")
     object Home : Screen("home")
+    object Calc: Screen("calc")
 }
 
 @Composable
@@ -36,7 +38,7 @@ fun AppNavigation() {
     LaunchedEffect(Unit) {
         // Verifica se há um usuário logado no Firebase Auth
         val currentUser = FirebaseProvider.auth.currentUser
-        startDestination = if (currentUser != null) Screen.Home.route else Screen.SignUp.route
+        startDestination = if (currentUser != null) Screen.Calc.route else Screen.SignUp.route
         isCheckingSection = false
     }
 
@@ -89,5 +91,10 @@ fun AppNavigation() {
         composable(Screen.Home.route) {
             HomeScreen()
         }
+
+        composable(Screen.Calc.route) {
+            Calculadora()
+        }
+
     }
 }
