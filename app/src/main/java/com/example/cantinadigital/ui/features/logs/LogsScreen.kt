@@ -16,8 +16,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -41,12 +41,14 @@ fun LogsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val categories = listOf("Tudo", "Produtos", "Pedidos", "Repasses")
+
+    val categories = listOf("Tudo", "Produtos", "Caixa", "Repasses", "Pedidos")
 
     val filteredLogs = when (selectedTabIndex) {
-        1 -> uiState.logs.filter { it.type == "PRODUTO" }
-        2 -> uiState.logs.filter { it.type == "PEDIDO" }
-        3 -> uiState.logs.filter { it.type == "REPASSE" }
+        1 -> uiState.logs.filter { it.type.equals("PRODUTO", ignoreCase = true) }
+        2 -> uiState.logs.filter { it.type.equals("CAIXA", ignoreCase = true) }
+        3 -> uiState.logs.filter { it.type.equals("REPASSE", ignoreCase = true) }
+        4 -> uiState.logs.filter { it.type.equals("PEDIDO", ignoreCase = true) }
         else -> uiState.logs
     }
 
@@ -78,15 +80,22 @@ fun LogsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            TabRow(
+            ScrollableTabRow(
                 selectedTabIndex = selectedTabIndex,
+                edgePadding = 16.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 categories.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTabIndex == index,
                         onClick = { selectedTabIndex = index },
-                        text = { Text(text = title) }
+                        text = {
+                            Text(
+                                text = title,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1 // Garante que o texto fique sempre em uma única linha
+                            )
+                        }
                     )
                 }
             }

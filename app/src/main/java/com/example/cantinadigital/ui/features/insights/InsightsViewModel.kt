@@ -73,24 +73,13 @@ class InsightsViewModel(
 
         var totalRevenue = 0.0
         var cantinaRoyalties = 0.0
+        var ownProductsRevenue = 0.0 // Receita de produtos próprios da cantina
 
-        val productSeller =
-            mutableMapOf<String, MutableList<PayoutProduct>>()
+        val productSeller = mutableMapOf<String, MutableList<PayoutProduct>>()
+        val grossSeller = mutableMapOf<String, Double>()
+        val sellerTax = mutableMapOf<String, Double>()
+        val sellerClassMap = mutableMapOf<String, String>()
 
-        val grossSeller =
-            mutableMapOf<String, Double>()
-
-        val sellerTax =
-            mutableMapOf<String, Double>()
-
-        // Mapeia a sala/turma correspondente a cada vendedor
-        val sellerClassMap =
-            mutableMapOf<String, String>()
-
-        /*
-         * Cada item já repassado vira uma chave:
-         * pedidoId + vendedor
-         */
         val paidKeys = payouts
             .flatMap { payout ->
                 payout.produtos.map { product ->
@@ -108,149 +97,102 @@ class InsightsViewModel(
 
             for (item in order.items) {
 
-                val itemTotal =
-                    item.unitValue * item.amount
+                val itemTotal = item.unitValue * item.amount
 
                 /*
-                 * A Cantina é tratada separadamente.
+                 * Produtos da própria Cantina: 100% da receita entra para o caixa da cantina.
                  */
-                if (
-                    item.vendedor.equals(
-                        "Cantina",
-                        ignoreCase = true
-                    )
-                ) {
+                if (item.vendedor.equals("Cantina", ignoreCase = true)) {
+                    ownProductsRevenue += itemTotal
                     continue
                 }
 
-                val seller =
-                    item.vendedor.trim()
+                val seller = item.vendedor.trim()
 
-                // Salva a sala do vendedor (caso ainda não esteja salva)
                 if (item.sala.isNotBlank()) {
                     sellerClassMap[seller] = item.sala
                 }
 
-                val taxPercent =
-                    item.taxaCantina / 100.0
-
-                val taxValue =
-                    itemTotal * taxPercent
+                val taxPercent = item.taxaCantina / 100.0
+                val taxValue = itemTotal * taxPercent
 
                 /*
-                 * Receita histórica da Cantina.
-                 * Continua considerando todas as vendas.
+                 * Receita total de taxas (royalties) da cantina.
                  */
                 cantinaRoyalties += taxValue
 
-                /*
-                 * Verificamos especificamente pedido + vendedor.
-                 */
-                val payoutKey =
-                    createPayoutKey(
-                        orderId = order.id,
-                        sellerName = seller
-                    )
+                val payoutKey = createPayoutKey(
+                    orderId = order.id,
+                    sellerName = seller
+                )
 
                 /*
-                 * Já foi repassado?
+                 * Se já foi repassado, pula a inclusão nos repasses pendentes.
                  */
                 if (payoutKey in paidKeys) {
                     continue
                 }
 
-                grossSeller[seller] =
-                    (grossSeller[seller] ?: 0.0) + itemTotal
+                grossSeller[seller] = (grossSeller[seller] ?: 0.0) + itemTotal
+                sellerTax[seller] = (sellerTax[seller] ?: 0.0) + taxValue
 
-                sellerTax[seller] =
-                    (sellerTax[seller] ?: 0.0) + taxValue
-
-                val payoutProduct =
-                    PayoutProduct(
-                        pedidoId = order.id,
-                        produtoId = item.productId,
-                        nome = item.name,
-                        quantidade = item.amount,
-                        valorUnitario = item.unitValue,
-                        valorTotal = itemTotal,
-                        taxaCantina = item.taxaCantina
-                    )
+                val payoutProduct = PayoutProduct(
+                    pedidoId = order.id,
+                    produtoId = item.productId,
+                    nome = item.name,
+                    quantidade = item.amount,
+                    valorUnitario = item.unitValue,
+                    valorTotal = itemTotal,
+                    taxaCantina = item.taxaCantina
+                )
 
                 productSeller
-                    .getOrPut(seller) {
-                        mutableListOf()
-                    }
+                    .getOrPut(seller) { mutableListOf() }
                     .add(payoutProduct)
             }
         }
 
         /*
-         * Movimentações manuais.
+         * Movimentações manuais do caixa.
          */
-        val totalExits =
-            transactions
-                .filter {
-                    it.tipo.equals(
-                        "SAIDA",
-                        ignoreCase = true
-                    )
-                }
-                .sumOf { it.valor }
+        val totalExits = transactions
+            .filter { it.tipo.equals("SAIDA", ignoreCase = true) }
+            .sumOf { it.valor }
 
-        val totalManualEntry =
-            transactions
-                .filter {
-                    it.tipo.equals(
-                        "ENTRADA",
-                        ignoreCase = true
-                    )
-                }
-                .sumOf { it.valor }
+        val totalManualEntry = transactions
+            .filter { it.tipo.equals("ENTRADA", ignoreCase = true) }
+            .sumOf { it.valor }
 
         /*
-         * Esse saldo continua sendo o saldo geral da cantina.
+         * Saldo REAL do Caixa da Cantina:
+         * Receita das vendas da própria Cantina + Taxas cobradas dos alunos + Suprimentos manuais
+         * DEDUZINDO: Apenas Sangrias manuais (Retiradas).
          */
-        val balance =
-            (totalRevenue + totalManualEntry) - totalExits
 
-        /*
-         * Montamos os cards dos vendedores
-         * que ainda possuem dinheiro pendente.
-         */
-        val repassesList =
-            grossSeller.map { (seller, gross) ->
+        val balance = (ownProductsRevenue + cantinaRoyalties + totalManualEntry) - totalExits
 
-                val tax =
-                    sellerTax[seller] ?: 0.0
+        val repassesList = grossSeller.map { (seller, gross) ->
+            val tax = sellerTax[seller] ?: 0.0
+            val products = productSeller[seller] ?: emptyList()
 
-                val products =
-                    productSeller[seller]
-                        ?: emptyList()
+            val groupedProducts = products
+                .groupBy { it.nome }
+                .map { (name, list) ->
+                    Pair(name, list.sumOf { it.quantidade })
+                }
 
-                val groupedProducts =
-                    products
-                        .groupBy { it.nome }
-                        .map { (name, list) ->
-                            Pair(
-                                name,
-                                list.sumOf {
-                                    it.quantidade
-                                }
-                            )
-                        }
-
-                SellerPayoutSummary(
-                    sellerName = seller,
-                    sellerClass = sellerClassMap[seller] ?: "", // Passando o novo parâmetro obrigatório
-                    statusLabel = "Repasse pendente",
-                    isPaid = false,
-                    itemsSold = groupedProducts,
-                    grossTotal = gross,
-                    cantinaTax = tax,
-                    liquidValueRepass = gross - tax,
-                    payoutProducts = products
-                )
-            }
+            SellerPayoutSummary(
+                sellerName = seller,
+                sellerClass = sellerClassMap[seller] ?: "",
+                statusLabel = "Repasse pendente",
+                isPaid = false,
+                itemsSold = groupedProducts,
+                grossTotal = gross,
+                cantinaTax = tax,
+                liquidValueRepass = gross - tax,
+                payoutProducts = products
+            )
+        }
 
         return InsightsUiState(
             totalRevenue = totalRevenue,
@@ -315,19 +257,35 @@ class InsightsViewModel(
         value: Double,
         reason: String
     ) {
-
         viewModelScope.launch {
+            // 1. Busca os dados do usuário conectado (Nome e Turma/Sala)
+            val userResult = authRepository.getDadosUsuarioLogado()
+            val userData = userResult.getOrNull()
 
-            val transaction =
-                FinancialTransaction(
-                    tipo = type,
-                    valor = value,
-                    motivo = reason,
-                    funcionarioNome = "Atendente"
-                )
+            val userName = userData?.get("nome") as? String ?: "Atendente"
+            val userClass = userData?.get("turma") as? String ?: ""
 
-            financialRepository
-                .addTransaction(transaction)
+            // 2. Monta e envia a transação financeira
+            val transaction = FinancialTransaction(
+                tipo = type,
+                valor = value,
+                motivo = reason,
+                funcionarioNome = userName
+            )
+
+            financialRepository.addTransaction(transaction)
+
+            // 3. Registra o Log de Auditoria para o Caixa
+            val actionName = if (type == "ENTRADA") "SUPRIMENTO" else "RETIRADA"
+            val actionLabel = if (type == "ENTRADA") "Entrada" else "Saída"
+
+            auditLogRepository.logAction(
+                type = "CAIXA",
+                action = actionName,
+                description = "Lançamento de $actionLabel manual: R$ %.2f - Motivo: %s".format(value, reason),
+                username = userName,
+                userClass = userClass
+            )
         }
     }
 

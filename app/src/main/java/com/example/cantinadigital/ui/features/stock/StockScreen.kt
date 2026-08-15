@@ -38,19 +38,15 @@ import com.example.cantinadigital.ui.components.forms.AddProductBottomSheet
 import com.example.cantinadigital.ui.components.forms.EditProductBottomSheet
 import com.example.cantinadigital.ui.features.stock.model.AddProductUiState
 
-// Componente principal que se conecta ao ViewModel
 @Composable
 fun StockScreen(
     modifier: Modifier = Modifier,
     viewModel: StockViewModel = viewModel()
 ) {
-
     val context = LocalContext.current
     val products by viewModel.products.collectAsState()
 
     val addProductState by viewModel.addProductState.collectAsState()
-    val updateProductState by viewModel.updateProductState.collectAsState()
-    val deleteProductState by viewModel.deleteProductState.collectAsState()
 
     var showAddBottomSheet by remember { mutableStateOf(false) }
     var productToEdit by remember { mutableStateOf<Product?>(null) }
@@ -87,16 +83,15 @@ fun StockScreen(
         onDismissEditBottomSheet = {
             productToEdit = null
         },
-        onConfirmUpdateProduct = { updatedProduct ->
-            viewModel.updateProduct(updatedProduct)
+        onConfirmUpdateProduct = { oldProduct, updatedProduct ->
+            viewModel.updateProduct(oldProduct, updatedProduct)
             productToEdit = null
         },
-        onConfirmDeleteProduct = { productTodDelete ->
-            viewModel.deleteProduct(productTodDelete)
+        onConfirmDeleteProduct = { productToDelete ->
+            viewModel.deleteProduct(productToDelete)
             productToEdit = null
         }
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,15 +107,14 @@ fun StockContent(
     onConfirmAddProduct: (Product) -> Unit,
     onEditClick: (Product) -> Unit,
     onDismissEditBottomSheet: () -> Unit,
-    onConfirmUpdateProduct: (Product) -> Unit,
+    onConfirmUpdateProduct: (Product, Product) -> Unit, // Atualizado para receber (oldProduct, newProduct)
     onConfirmDeleteProduct: (Product) -> Unit
 ) {
-
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
             FloatingActionButton(
-                onAddClick,
+                onClick = onAddClick,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -131,13 +125,11 @@ fun StockContent(
             }
         }
     ) { innerPadding ->
-
         Column(
             modifier = Modifier.padding(innerPadding)
         ) {
-
             Text(
-                modifier  = Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 text = "Lista de produtos",
@@ -147,17 +139,11 @@ fun StockContent(
             )
 
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
-
-
-
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        bottom = 88.dp
-                    )
+                    contentPadding = PaddingValues(bottom = 88.dp)
                 ) {
                     items(
                         items = products,
@@ -175,7 +161,6 @@ fun StockContent(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
-
             }
 
             if (showAddBottomSheet) {
@@ -186,20 +171,17 @@ fun StockContent(
                 )
             }
 
-            productToEdit?.let { product ->
+            productToEdit?.let { oldProduct ->
                 EditProductBottomSheet(
                     modifier = Modifier,
-                    productToEdit = product,
+                    productToEdit = oldProduct,
                     onDismissRequest = onDismissEditBottomSheet,
-                    onConfirmUpdate = onConfirmUpdateProduct,
+                    onConfirmUpdate = { updatedProduct ->
+                        onConfirmUpdateProduct(oldProduct, updatedProduct)
+                    },
                     onConfirmDelete = onConfirmDeleteProduct
                 )
             }
-
         }
-
-        }
-
-
-
+    }
 }

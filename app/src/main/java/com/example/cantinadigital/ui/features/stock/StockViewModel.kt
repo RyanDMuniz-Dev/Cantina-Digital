@@ -75,18 +75,41 @@ class StockViewModel(
         }
     }
 
-    fun updateProduct(product: Product) {
+    fun updateProduct(oldProduct: Product, newProduct: Product) {
         viewModelScope.launch {
             try {
-                repository.updateProduct(product) { success ->
+                repository.updateProduct(newProduct) { success ->
                     if (success) {
                         _updateProductState.value = UpdateProductUiState.Success
                         viewModelScope.launch {
                             val (userName, userClass) = getUserData()
+
+                            // Constrói a lista do que realmente mudou
+                            val changes = mutableListOf<String>()
+
+                            if (oldProduct.nome != newProduct.nome) {
+                                changes.add("nome de '${oldProduct.nome}' para '${newProduct.nome}'")
+                            }
+                            if (oldProduct.valor != newProduct.valor) {
+                                changes.add("preço de R$ %.2f para R$ %.2f".format(oldProduct.valor, newProduct.valor))
+                            }
+                            if (oldProduct.quantidade != newProduct.quantidade) {
+                                changes.add("estoque de ${oldProduct.quantidade} para ${newProduct.quantidade}")
+                            }
+                            if (oldProduct.vendedor != newProduct.vendedor) {
+                                changes.add("vendedor de '${oldProduct.vendedor}' para '${newProduct.vendedor}'")
+                            }
+
+                            val description = if (changes.isNotEmpty()) {
+                                "Atualizou ${newProduct.nome}: " + changes.joinToString(", ")
+                            } else {
+                                "Atualizou informações de '${newProduct.nome}'"
+                            }
+
                             auditLogRepository.logAction(
                                 type = "PRODUTO",
                                 action = "ATUALIZAR",
-                                description = "Atualizou o produto '${product.nome}'",
+                                description = description,
                                 username = userName,
                                 userClass = userClass
                             )
