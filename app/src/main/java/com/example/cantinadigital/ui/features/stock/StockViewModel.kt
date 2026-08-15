@@ -3,6 +3,8 @@ package com.example.cantinadigital.ui.features.stock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cantinadigital.data.model.Product
+import com.example.cantinadigital.data.repository.AuditLogRepository
+import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.data.repository.ProductRepository
 import com.example.cantinadigital.ui.features.stock.model.AddProductUiState
 import com.example.cantinadigital.ui.features.stock.model.DeleteProductUiState
@@ -15,7 +17,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class StockViewModel(
-    private val repository: ProductRepository = ProductRepository()
+    private val repository: ProductRepository = ProductRepository(),
+    private val auditLogRepository: AuditLogRepository = AuditLogRepository(),
+    private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
     private val _addProductState = MutableStateFlow<AddProductUiState>(AddProductUiState.Idle)
@@ -33,8 +37,15 @@ class StockViewModel(
             initialValue = emptyList()
         )
 
-    fun addProduct(product: Product) {
+    private suspend fun getUserData(): Pair<String, String> {
+        val userResult = authRepository.getDadosUsuarioLogado()
+        val userData = userResult.getOrNull()
+        val name = userData?.get("nome") as? String ?: "Atendente"
+        val userClass = userData?.get("turma") as? String ?: ""
+        return Pair(name, userClass)
+    }
 
+    fun addProduct(product: Product) {
         if (_addProductState.value is AddProductUiState.Loading) return
 
         viewModelScope.launch {
@@ -44,6 +55,16 @@ class StockViewModel(
                 repository.addProduct(product) { success ->
                     if (success) {
                         _addProductState.value = AddProductUiState.Success
+                        viewModelScope.launch {
+                            val (userName, userClass) = getUserData()
+                            auditLogRepository.logAction(
+                                type = "PRODUTO",
+                                action = "CRIAR",
+                                description = "Cadastrou o produto '${product.nome}' (${product.vendedor})",
+                                username = userName,
+                                userClass = userClass
+                            )
+                        }
                     } else {
                         _addProductState.value = AddProductUiState.Error("Falha ao salvar produto no banco.")
                     }
@@ -60,6 +81,16 @@ class StockViewModel(
                 repository.updateProduct(product) { success ->
                     if (success) {
                         _updateProductState.value = UpdateProductUiState.Success
+                        viewModelScope.launch {
+                            val (userName, userClass) = getUserData()
+                            auditLogRepository.logAction(
+                                type = "PRODUTO",
+                                action = "ATUALIZAR",
+                                description = "Atualizou o produto '${product.nome}'",
+                                username = userName,
+                                userClass = userClass
+                            )
+                        }
                     } else {
                         _updateProductState.value = UpdateProductUiState.Error("Falha ao atualizar produto no banco")
                     }
@@ -76,6 +107,16 @@ class StockViewModel(
                 repository.deleteProduct(product) { success ->
                     if (success) {
                         _deleteProductState.value = DeleteProductUiState.Success
+                        viewModelScope.launch {
+                            val (userName, userClass) = getUserData()
+                            auditLogRepository.logAction(
+                                type = "PRODUTO",
+                                action = "EXCLUIR",
+                                description = "Removeu o produto '${product.nome}'",
+                                username = userName,
+                                userClass = userClass
+                            )
+                        }
                     } else {
                         _deleteProductState.value = DeleteProductUiState.Error("Falha ao deletar produto no banco")
                     }

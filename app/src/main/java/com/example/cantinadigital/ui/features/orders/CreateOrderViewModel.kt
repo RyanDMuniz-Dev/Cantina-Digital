@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.cantinadigital.data.model.Order
 import com.example.cantinadigital.data.model.OrderItem
 import com.example.cantinadigital.data.model.Product
+import com.example.cantinadigital.data.repository.AuditLogRepository
 import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.data.repository.OrderRepository
 import com.example.cantinadigital.data.repository.ProductRepository
@@ -17,10 +18,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CreateOrderViewModel (
+class CreateOrderViewModel(
     private val orderRepository: OrderRepository = OrderRepository(),
     private val productRepository: ProductRepository = ProductRepository(),
-    private val authRepository: AuthRepository = AuthRepository()
+    private val authRepository: AuthRepository = AuthRepository(),
+    private val auditLogRepository: AuditLogRepository = AuditLogRepository()
 ) : ViewModel() {
 
     private val _products = MutableStateFlow<List<Product>>(emptyList())
@@ -44,8 +46,8 @@ class CreateOrderViewModel (
         } else {
             products.filter {
                 it.nome.contains(query, ignoreCase = true) ||
-                it.emoji.contains(query) ||
-                it.vendedor.contains(query)
+                        it.emoji.contains(query) ||
+                        it.vendedor.contains(query)
             }
         }
     }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
@@ -74,7 +76,6 @@ class CreateOrderViewModel (
     fun onSearchQueryChanged(newQuery: String) {
         _searchQuery.value = newQuery
     }
-
 
     fun addProductToCart(product: Product) {
         _cartItems.update { currentItems ->
@@ -123,7 +124,6 @@ class CreateOrderViewModel (
         receivedValue: Double,
         change: Double
     ) {
-
         if (_uiState.value == CreateOrderUiState.Loading) return
 
         val currentCart = _cartItems.value
@@ -138,7 +138,7 @@ class CreateOrderViewModel (
             val userData = userResult.getOrNull()
 
             val employeeName = userData?.get("nome") as? String ?: "Atendente"
-            val employeeClass = userData?.get("turma") as? String ?: "Geral"
+            val employeeClass = userData?.get("turma") as? String ?: ""
 
             val newOrder = Order(
                 employeeName = employeeName,
@@ -154,18 +154,39 @@ class CreateOrderViewModel (
             if (success) {
                 _cartItems.value = emptyList()
                 _uiState.value = CreateOrderUiState.Success
+
+                // Grava o log de auditoria
+                auditLogRepository.logAction(
+                    type = "PEDIDO",
+                    action = "CRIAR",
+                    description = "Registrou novo pedido no valor de R$ %.2f (%s)".format(total, paymentType),
+                    username = employeeName,
+                    userClass = employeeClass
+                )
             } else {
                 _uiState.value = CreateOrderUiState.Error("Falha ao registrar pedido")
             }
         }
-
     }
 
     fun deleteOrder(order: Order) {
         viewModelScope.launch {
+            val userResult = authRepository.getDadosUsuarioLogado()
+            val userData = userResult.getOrNull()
+
+            val employeeName = userData?.get("nome") as? String ?: "Atendente"
+            val employeeClass = userData?.get("turma") as? String ?: ""
+
             val success = orderRepository.deleteOrder(order)
             if (success) {
-
+                // Grava o log de auditoria ao cancelar/deletar pedido
+                auditLogRepository.logAction(
+                    type = "PEDIDO",
+                    action = "CANCELAR",
+                    description = "Cancelou o pedido de R$ %.2f".format(order.totalValue),
+                    username = employeeName,
+                    userClass = employeeClass
+                )
             } else {
                 _uiState.value = CreateOrderUiState.Error("Erro ao excluir o pedido")
             }
@@ -175,5 +196,4 @@ class CreateOrderViewModel (
     fun resetUiState() {
         _uiState.value = CreateOrderUiState.Idle
     }
-
 }
