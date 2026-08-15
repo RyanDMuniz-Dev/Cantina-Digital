@@ -6,6 +6,7 @@ import com.example.cantinadigital.data.model.FinancialTransaction
 import com.example.cantinadigital.data.model.Order
 import com.example.cantinadigital.data.model.Payout
 import com.example.cantinadigital.data.model.PayoutProduct
+import com.example.cantinadigital.data.repository.AuditLogRepository
 import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.data.repository.FinancialRepository
 import com.example.cantinadigital.data.repository.OrderRepository
@@ -22,7 +23,8 @@ class InsightsViewModel(
     private val orderRepository: OrderRepository = OrderRepository(),
     private val financialRepository: FinancialRepository = FinancialRepository(),
     private val payoutRepository: PayoutRepository = PayoutRepository(),
-    private val authRepository: AuthRepository = AuthRepository()
+    private val authRepository: AuthRepository = AuthRepository(),
+    private val auditLogRepository: AuditLogRepository = AuditLogRepository()
 ) : ViewModel() {
 
     private val _uiState =
@@ -263,7 +265,6 @@ class InsightsViewModel(
 
     fun confirmPayout(summary: SellerPayoutSummary) {
         viewModelScope.launch {
-
             val userResult = authRepository.getDadosUsuarioLogado()
             val userData = userResult.getOrNull()
 
@@ -282,6 +283,13 @@ class InsightsViewModel(
             )
 
             payoutRepository.createPayout(payout)
+
+            auditLogRepository.logAction(
+                type = "REPASSE",
+                action = "CONFIRMAR",
+                description = "Confirmou repasse de R$ %.2f para %s".format(summary.liquidValueRepass, summary.sellerName),
+                username = employeeName
+            )
         }
     }
 
