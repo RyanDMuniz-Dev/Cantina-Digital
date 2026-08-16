@@ -16,7 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -30,8 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.cantinadigital.ui.components.cards.AuditLogCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,7 +80,7 @@ fun LogsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            ScrollableTabRow(
+            SecondaryScrollableTabRow(
                 selectedTabIndex = selectedTabIndex,
                 edgePadding = 16.dp,
                 modifier = Modifier.fillMaxWidth()
@@ -123,7 +122,13 @@ fun LogsScreen(
                             items = filteredLogs,
                             key = { it.id }
                         ) { log ->
-                            AuditLogCard(log = log)
+                            AuditLogCard(
+                                log = log,
+                                modifier = Modifier.padding(
+                                    horizontal = 16.dp,
+                                    vertical = 6.dp
+                                )
+                            )
                         }
                     }
                 }

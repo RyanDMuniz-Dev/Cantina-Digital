@@ -30,9 +30,6 @@ class StockViewModel @Inject constructor(
     private val _deleteProductState = MutableStateFlow<DeleteProductUiState>(DeleteProductUiState.Idle)
 
     val addProductState: StateFlow<AddProductUiState> = _addProductState.asStateFlow()
-    val updateProductState: StateFlow<UpdateProductUiState> = _updateProductState.asStateFlow()
-    val deleteProductState: StateFlow<DeleteProductUiState> = _deleteProductState.asStateFlow()
-
     val products: StateFlow<List<Product>> = repository.getProductFlow()
         .stateIn(
             scope = viewModelScope,
@@ -155,13 +152,6 @@ class StockViewModel @Inject constructor(
 
     fun resetAddProductState() {
         _addProductState.value = AddProductUiState.Idle
-    }
-
-    fun resetUpdateProductState() {
-        _updateProductState.value = UpdateProductUiState.Idle
-    }
-    fun resetDeletProductState() {
-        _deleteProductState.value = DeleteProductUiState.Idle
     }
 
 }

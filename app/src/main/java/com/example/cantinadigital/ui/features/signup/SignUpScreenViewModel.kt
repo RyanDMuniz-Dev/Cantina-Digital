@@ -48,7 +48,7 @@ class SignUpScreenViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            val result = repository?.signUp(
+            val result = repository.signUp(
                 fullName = state.name,
                 email = state.email,
                 password = state.password,

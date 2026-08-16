@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.example.cantinadigital.data.model.AuditLog
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.TimeZone
 
 @Composable
 fun AuditLogCard(
@@ -29,9 +30,7 @@ fun AuditLogCard(
     }
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -74,10 +73,13 @@ fun AuditLogCard(
                     )
                 }
 
-                // Data e Hora do log
+                // Data e Hora do log formatados no fuso horário do dispositivo
                 Text(
                     text = log.dateTime?.toDate()?.let { date ->
-                        SimpleDateFormat("HH:mm · dd/MM", Locale.getDefault()).format(date)
+                        val formatter = SimpleDateFormat("HH:mm · dd/MM", Locale.getDefault()).apply {
+                            timeZone = TimeZone.getDefault()
+                        }
+                        formatter.format(date)
                     } ?: "",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant

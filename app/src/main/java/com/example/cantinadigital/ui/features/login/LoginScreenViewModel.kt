@@ -39,15 +39,14 @@ class LoginScreenViewModel @Inject constructor(
 
             _uiState.update { it.copy(isLoading = true, isSuccess = false, errorMessage = null) }
 
-            val result = repository?.signIn(
+            val result = repository.signIn(
                 email = state.email,
                 password = state.pass
             )
 
-            result?.fold(
+            result.fold(
                 onSuccess = {
                     _uiState.update { it.copy(isLoading = false, isSuccess = true) }
-                    // TODO: navegar para a próxima tela
                 },
                 onFailure = { error ->
                     _uiState.update { it.copy(isLoading = false, errorMessage = error.message ?: "Unknow error") }

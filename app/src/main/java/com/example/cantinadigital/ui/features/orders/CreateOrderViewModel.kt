@@ -29,7 +29,6 @@ class CreateOrderViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _products = MutableStateFlow<List<Product>>(emptyList())
-    val products: StateFlow<List<Product>> = _products.asStateFlow()
 
     private val _cartItems = MutableStateFlow<List<OrderItem>>(emptyList())
     val cartItems: StateFlow<List<OrderItem>> = _cartItems.asStateFlow()

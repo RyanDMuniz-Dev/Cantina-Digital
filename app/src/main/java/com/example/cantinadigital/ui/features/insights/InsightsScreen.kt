@@ -21,8 +21,8 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,7 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.cantinadigital.ui.components.cards.ConfirmedPayoutCard
 import com.example.cantinadigital.ui.components.cards.MetricCard
 import com.example.cantinadigital.ui.components.cards.SellerPayoutCard
@@ -147,15 +147,22 @@ fun InsightsScreen(
 
                     // 1. Componente de Abas exatamente na posição indicada!
                     item {
-                        TabRow(
+                        SecondaryTabRow(
                             selectedTabIndex = selectedTabIndex,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.primary
                         ) {
                             tabs.forEachIndexed { index, title ->
                                 Tab(
                                     selected = selectedTabIndex == index,
                                     onClick = { selectedTabIndex = index },
-                                    text = { Text(text = title, color = MaterialTheme.colorScheme.onPrimaryContainer) }
+                                    text = {
+                                        Text(
+                                            text = title,
+                                            fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    }
                                 )
                             }
                         }
