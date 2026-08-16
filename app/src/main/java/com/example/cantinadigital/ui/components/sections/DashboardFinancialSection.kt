@@ -74,7 +74,7 @@ fun DashboardFinancialSection(
 
             SimpleMetricCard(
                 emoji = "🎫",
-                title = "Ticket Médio",
+                title = "Valor médio por venda",
                 value = formatCurrency(averageTicket),
                 modifier = Modifier.weight(1f)
             )

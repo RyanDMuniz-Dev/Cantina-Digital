@@ -11,6 +11,7 @@ import com.example.cantinadigital.data.repository.FinancialRepository
 import com.example.cantinadigital.data.repository.OrderRepository
 import com.example.cantinadigital.data.repository.PayoutRepository
 import com.example.cantinadigital.data.repository.ProductRepository
+import com.example.cantinadigital.ui.features.dashboard.model.DailySalesSummary
 import com.example.cantinadigital.ui.features.dashboard.model.DashboardPeriod
 import com.example.cantinadigital.ui.features.dashboard.model.DashboardUiState
 import com.example.cantinadigital.ui.features.dashboard.model.ProductSalesSummary
@@ -20,6 +21,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -250,7 +253,10 @@ class DashboardViewModel @Inject constructor(
                     mostSoldProduct = mostSoldProduct,
                     topProducts = topProducts,
 
-                    dailySales = emptyList(),
+                    dailySales = buildSalesChartData(
+                        orders = filteredOrders,
+                        period = selectedPeriod
+                    ),
 
                     lowStockProducts = lowStockProducts,
 
@@ -295,8 +301,7 @@ class DashboardViewModel @Inject constructor(
             0
         )
 
-        val startCalendar =
-            calendar.clone() as java.util.Calendar
+        val startCalendar = calendar.clone() as java.util.Calendar
 
         when (period) {
 
@@ -319,8 +324,7 @@ class DashboardViewModel @Inject constructor(
             }
         }
 
-        val endCalendar =
-            calendar.clone() as java.util.Calendar
+        val endCalendar = calendar.clone() as java.util.Calendar
 
         endCalendar.add(
             java.util.Calendar.DAY_OF_YEAR,
@@ -329,6 +333,60 @@ class DashboardViewModel @Inject constructor(
 
         return startCalendar.timeInMillis to
                 endCalendar.timeInMillis
+    }
+
+    private fun buildSalesChartData(
+        orders: List<Order>,
+        period: DashboardPeriod
+    ): List<DailySalesSummary> {
+
+        if (orders.isEmpty()) {
+            return emptyList()
+        }
+
+        val locale = Locale("pt", "BR")
+
+        val format = when (period) {
+            DashboardPeriod.TODAY -> SimpleDateFormat("HH'h", locale)
+            DashboardPeriod.LAST_7_DAYS -> SimpleDateFormat("EEE", locale)
+            DashboardPeriod.LAST_30_DAYS -> SimpleDateFormat("dd/MM", locale)
+            DashboardPeriod.ALL -> SimpleDateFormat("dd/MM", locale)
+        }
+
+        val groupingFormat = when (period) {
+            DashboardPeriod.TODAY -> SimpleDateFormat("yyyy-MM-dd-HH", locale)
+            DashboardPeriod.LAST_7_DAYS,
+            DashboardPeriod.LAST_30_DAYS,
+            DashboardPeriod.ALL -> SimpleDateFormat("yyyy-MM-dd", locale)
+        }
+
+        val groupedSales = orders
+            .filter { it.dateTime != null }
+            .groupBy { order ->
+                groupingFormat.format(
+                    order.dateTime!!.toDate()
+                )
+            }
+
+        return groupedSales
+            .map { (key, groupedOrders) ->
+
+                val firstOrder = groupedOrders.first()
+
+                val date = firstOrder.dateTime!!.toDate()
+
+                DailySalesSummary(
+                    key = key,
+                    label = format.format(date),
+                    revenue = groupedOrders.sumOf {
+                        it.totalValue
+                    }
+                )
+
+            }.sortedBy {
+                it.key
+            }
+
     }
 
     private data class DashboardRawData(
