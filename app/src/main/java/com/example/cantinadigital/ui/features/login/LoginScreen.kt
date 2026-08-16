@@ -34,13 +34,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cantinadigital.R
-import com.example.cantinadigital.ui.components.FormTextField
-import com.example.cantinadigital.ui.components.PasswordTextField
-import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
+import com.example.cantinadigital.ui.components.fields.FormTextField
+import com.example.cantinadigital.ui.components.fields.PasswordTextField
 
 @Composable
 fun LoginScreen(

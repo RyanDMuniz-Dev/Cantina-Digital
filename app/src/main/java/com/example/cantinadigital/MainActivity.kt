@@ -12,18 +12,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
             CantinaDigitalTheme {
 
                 AppNavigation()
 
             }
-
         }
     }
 }
-
-
-// test account
-// email: ryandmuniz@gmail.com
-// password: Cemep2026#

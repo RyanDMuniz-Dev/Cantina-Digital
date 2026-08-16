@@ -1,4 +1,4 @@
-package com.example.cantinadigital.ui.components
+package com.example.cantinadigital.ui.components.fields
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth

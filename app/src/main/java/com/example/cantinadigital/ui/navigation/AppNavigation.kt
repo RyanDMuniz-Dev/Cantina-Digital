@@ -13,7 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.cantinadigital.data.remote.FirebaseProvider
-import com.example.cantinadigital.ui.features.home.HomeScreen
+import com.example.cantinadigital.ui.mainScreen.MainScreen
 import com.example.cantinadigital.ui.features.login.LoginScreen
 import com.example.cantinadigital.ui.features.signup.SignUpScreen
 
@@ -22,7 +22,7 @@ sealed class Screen(
 ) {
     object SignUp : Screen("signup")
     object Login : Screen("login")
-    object Home : Screen("home")
+    object Main : Screen("main")
 }
 
 @Composable
@@ -36,7 +36,7 @@ fun AppNavigation() {
     LaunchedEffect(Unit) {
         // Verifica se há um usuário logado no Firebase Auth
         val currentUser = FirebaseProvider.auth.currentUser
-        startDestination = if (currentUser != null) Screen.Home.route else Screen.SignUp.route
+        startDestination = if (currentUser != null) Screen.Main.route else Screen.SignUp.route
         isCheckingSection = false
     }
 
@@ -62,7 +62,7 @@ fun AppNavigation() {
             SignUpScreen(
                 viewModel = viewModel(),
                 onSignUpSuccess = {
-                    navController.navigate(Screen.Home.route) {
+                    navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.SignUp.route) { inclusive = true }
                     }
                 },
@@ -76,7 +76,7 @@ fun AppNavigation() {
             LoginScreen(
                 viewModel = viewModel(),
                 onLoginSuccess = {
-                    navController.navigate(Screen.Home.route) {
+                    navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.SignUp.route) { inclusive = true }
                     }
                 },
@@ -86,8 +86,8 @@ fun AppNavigation() {
             )
         }
 
-        composable(Screen.Home.route) {
-            HomeScreen()
+        composable(Screen.Main.route) {
+            MainScreen()
         }
     }
 }

@@ -1,15 +1,13 @@
-package com.example.cantinadigital.ui.components
+package com.example.cantinadigital.ui.components.fields
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -21,10 +19,9 @@ import com.example.cantinadigital.R
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 @Composable
-fun FormTextField(
+fun SimpleFormTextField(
     modifier: Modifier = Modifier,
     @StringRes label: Int,
-    @DrawableRes leadingIcon: Int,
     value: String,
     keyboardOptions: KeyboardOptions,
     singleLine: Boolean = true,
@@ -49,12 +46,6 @@ fun FormTextField(
             )
         },
         keyboardOptions = keyboardOptions,
-        leadingIcon = {
-            Icon(
-                painter = painterResource(leadingIcon),
-                contentDescription = contentDescription
-            )
-        }
     )
 
 }
@@ -63,12 +54,11 @@ fun FormTextField(
 @Composable
 private fun CustomTextFieldPreview() {
     CantinaDigitalTheme {
-        FormTextField(
+        SimpleFormTextField(
             label = R.string.app_name,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Next
             ),
-            leadingIcon = R.drawable.ic_mail_24dp,
             value = "",
             placeholder = "",
         ) { }

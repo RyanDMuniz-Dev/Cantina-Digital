@@ -16,7 +16,7 @@ android {
     defaultConfig {
         applicationId = "com.example.cantinadigital"
         minSdk = 24
-        targetSdk = 36 // isso está dando uma cobrinha amarela
+        targetSdk = 35 // isso está dando uma cobrinha amarela
         versionCode = 1
         versionName = "1.0"
 
@@ -55,6 +55,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
+    // Compose BOM para o app
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
@@ -64,27 +66,38 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
 
-    // Importa a plataforma Firebase BoM (gerencia as versões)
+    // Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
 
     // Bibliotecas do Firebase
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    implementation(libs.androidx.runtime)
+    implementation(libs.firebase.database)
 
-    // Suporte para chamadas assíncronas .await() no Kotlin
+    // Corrotinas para Firebase (.await())
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
+
+    // Ícones estendidos
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     implementation(libs.ktor.client.android)
 
+    // Hilt (Injeção de Dependência)
     implementation(libs.hilt.android)
     implementation(libs.core.ktx)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
+    // Testes
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // Aplica a BOM do Compose também nos testes para resolver a versão do ui-test-junit4
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
