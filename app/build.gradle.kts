@@ -70,8 +70,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
 
     // Bibliotecas do Firebase
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     implementation(libs.androidx.runtime)
     implementation(libs.firebase.database)
 
@@ -79,7 +79,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
 
     // Ícones estendidos
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation(libs.androidx.compose.material.icons.extended)
 
     implementation(libs.ktor.client.android)
 
@@ -95,7 +95,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Aplica a BOM do Compose também nos testes para resolver a versão do ui-test-junit4
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
