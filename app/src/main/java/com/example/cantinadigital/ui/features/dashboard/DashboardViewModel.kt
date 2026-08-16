@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
 
@@ -281,27 +282,26 @@ class DashboardViewModel @Inject constructor(
             return null
         }
 
-        val calendar =
-            java.util.Calendar.getInstance()
+        val calendar = Calendar.getInstance()
 
         calendar.set(
-            java.util.Calendar.HOUR_OF_DAY,
+            Calendar.HOUR_OF_DAY,
             0
         )
         calendar.set(
-            java.util.Calendar.MINUTE,
+            Calendar.MINUTE,
             0
         )
         calendar.set(
-            java.util.Calendar.SECOND,
+            Calendar.SECOND,
             0
         )
         calendar.set(
-            java.util.Calendar.MILLISECOND,
+            Calendar.MILLISECOND,
             0
         )
 
-        val startCalendar = calendar.clone() as java.util.Calendar
+        val startCalendar = calendar.clone() as Calendar
 
         when (period) {
 
@@ -311,23 +311,23 @@ class DashboardViewModel @Inject constructor(
 
             DashboardPeriod.LAST_7_DAYS -> {
                 startCalendar.add(
-                    java.util.Calendar.DAY_OF_YEAR,
+                    Calendar.DAY_OF_YEAR,
                     -6
                 )
             }
 
             DashboardPeriod.LAST_30_DAYS -> {
                 startCalendar.add(
-                    java.util.Calendar.DAY_OF_YEAR,
+                    Calendar.DAY_OF_YEAR,
                     -29
                 )
             }
         }
 
-        val endCalendar = calendar.clone() as java.util.Calendar
+        val endCalendar = calendar.clone() as Calendar
 
         endCalendar.add(
-            java.util.Calendar.DAY_OF_YEAR,
+            Calendar.DAY_OF_YEAR,
             1
         )
 
@@ -346,47 +346,241 @@ class DashboardViewModel @Inject constructor(
 
         val locale = Locale("pt", "BR")
 
-        val format = when (period) {
-            DashboardPeriod.TODAY -> SimpleDateFormat("HH'h", locale)
-            DashboardPeriod.LAST_7_DAYS -> SimpleDateFormat("EEE", locale)
-            DashboardPeriod.LAST_30_DAYS -> SimpleDateFormat("dd/MM", locale)
-            DashboardPeriod.ALL -> SimpleDateFormat("dd/MM", locale)
+        return when (period) {
+
+            DashboardPeriod.TODAY ->
+                buildTodayChartData(
+                    orders = orders,
+                    locale = locale
+                )
+
+            DashboardPeriod.LAST_7_DAYS ->
+                buildDailyChartData(
+                    orders = orders,
+                    days = 7,
+                    locale = locale
+                )
+
+            DashboardPeriod.LAST_30_DAYS ->
+                buildDailyChartData(
+                    orders = orders,
+                    days = 30,
+                    locale = locale
+                )
+
+            DashboardPeriod.ALL ->
+                buildAllTimeChartData(
+                    orders = orders,
+                    locale = locale
+                )
+        }
+    }
+
+    private fun buildTodayChartData(
+        orders: List<Order>,
+        locale: Locale
+    ): List<DailySalesSummary> {
+
+        val calendar = Calendar.getInstance()
+
+        val currentHour =
+            calendar.get(Calendar.HOUR_OF_DAY)
+
+        val salesByHour =
+            orders
+                .filter { it.dateTime != null }
+                .groupBy { order ->
+                    Calendar.getInstance().apply {
+                        time = order.dateTime!!.toDate()
+                    }.get(Calendar.HOUR_OF_DAY)
+                }
+                .mapValues { (_, hourlyOrders) ->
+                    hourlyOrders.sumOf {
+                        it.totalValue
+                    }
+                }
+
+        // Precisamos de pelo menos dois pontos
+        // para o gráfico de linha fazer sentido.
+        val startHour = when {
+            salesByHour.isEmpty() -> currentHour
+            salesByHour.keys.minOrNull()!! < currentHour ->
+                salesByHour.keys.minOrNull()!!
+            currentHour > 0 ->
+                currentHour - 1
+            else ->
+                currentHour
         }
 
-        val groupingFormat = when (period) {
-            DashboardPeriod.TODAY -> SimpleDateFormat("yyyy-MM-dd-HH", locale)
-            DashboardPeriod.LAST_7_DAYS,
-            DashboardPeriod.LAST_30_DAYS,
-            DashboardPeriod.ALL -> SimpleDateFormat("yyyy-MM-dd", locale)
+        val endHour =
+            maxOf(
+                currentHour,
+                salesByHour.keys.maxOrNull() ?: currentHour
+            )
+
+        return (startHour..endHour).map { hour ->
+
+            val key =
+                String.format(
+                    locale,
+                    "%02d",
+                    hour
+                )
+
+            DailySalesSummary(
+                key = key,
+                label = "${key}h",
+                revenue = salesByHour[hour] ?: 0.0
+            )
+        }
+    }
+
+    private fun buildDailyChartData(
+        orders: List<Order>,
+        days: Int,
+        locale: Locale
+    ): List<DailySalesSummary> {
+
+        val calendar =
+            Calendar.getInstance()
+
+        calendar.set(
+            Calendar.HOUR_OF_DAY,
+            0
+        )
+        calendar.set(
+            Calendar.MINUTE,
+            0
+        )
+        calendar.set(
+            Calendar.SECOND,
+            0
+        )
+        calendar.set(
+            Calendar.MILLISECOND,
+            0
+        )
+
+        val endCalendar =
+            calendar.clone() as Calendar
+
+        val startCalendar =
+            calendar.clone() as Calendar
+
+        startCalendar.add(
+            Calendar.DAY_OF_YEAR,
+            -(days - 1)
+        )
+
+        val salesByDay =
+            orders
+                .filter { it.dateTime != null }
+                .groupBy { order ->
+
+                    val dateCalendar =
+                        Calendar.getInstance().apply {
+                            time = order.dateTime!!.toDate()
+                        }
+
+                    String.format(
+                        locale,
+                        "%04d-%02d-%02d",
+                        dateCalendar.get(Calendar.YEAR),
+                        dateCalendar.get(Calendar.MONTH) + 1,
+                        dateCalendar.get(Calendar.DAY_OF_MONTH)
+                    )
+                }
+                .mapValues { (_, dailyOrders) ->
+                    dailyOrders.sumOf {
+                        it.totalValue
+                    }
+                }
+
+        val formatter =
+            SimpleDateFormat(
+                "EEE",
+                locale
+            )
+
+        val result =
+            mutableListOf<DailySalesSummary>()
+
+        while (!startCalendar.after(endCalendar)) {
+
+            val key =
+                String.format(
+                    locale,
+                    "%04d-%02d-%02d",
+                    startCalendar.get(Calendar.YEAR),
+                    startCalendar.get(Calendar.MONTH) + 1,
+                    startCalendar.get(Calendar.DAY_OF_MONTH)
+                )
+
+            result.add(
+                DailySalesSummary(
+                    key = key,
+                    label = formatter.format(
+                        startCalendar.time
+                    ).replaceFirstChar {
+                        it.uppercase()
+                    },
+                    revenue = salesByDay[key] ?: 0.0
+                )
+            )
+
+            startCalendar.add(
+                Calendar.DAY_OF_YEAR,
+                1
+            )
         }
 
-        val groupedSales = orders
+        return result
+    }
+
+    private fun buildAllTimeChartData(
+        orders: List<Order>,
+        locale: Locale
+    ): List<DailySalesSummary> {
+
+        val groupingFormat =
+            SimpleDateFormat(
+                "yyyy-MM-dd",
+                locale
+            )
+
+        val labelFormat =
+            SimpleDateFormat(
+                "dd/MM",
+                locale
+            )
+
+        return orders
             .filter { it.dateTime != null }
             .groupBy { order ->
+
                 groupingFormat.format(
                     order.dateTime!!.toDate()
                 )
             }
-
-        return groupedSales
             .map { (key, groupedOrders) ->
 
-                val firstOrder = groupedOrders.first()
-
-                val date = firstOrder.dateTime!!.toDate()
+                val date =
+                    groupedOrders
+                        .first()
+                        .dateTime!!
+                        .toDate()
 
                 DailySalesSummary(
                     key = key,
-                    label = format.format(date),
+                    label = labelFormat.format(date),
                     revenue = groupedOrders.sumOf {
                         it.totalValue
                     }
                 )
-
-            }.sortedBy {
+            }
+            .sortedBy {
                 it.key
             }
-
     }
 
     private data class DashboardRawData(

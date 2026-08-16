@@ -79,6 +79,8 @@ dependencies {
 
     // Ícones estendidos
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
 
     implementation(libs.ktor.client.android)
 

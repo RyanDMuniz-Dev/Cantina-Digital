@@ -2,14 +2,11 @@ package com.example.cantinadigital.ui.features.dashboard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +23,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.cantinadigital.ui.components.sections.DashboardFinancialSection
 import com.example.cantinadigital.ui.components.sections.LowStockSection
 import com.example.cantinadigital.ui.components.sections.MostSoldProductSection
+import com.example.cantinadigital.ui.components.sections.SalesChartSection
 import com.example.cantinadigital.ui.components.sections.TopProductsSection
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -107,7 +105,10 @@ fun DashboardScreen(
                 }
 
                 item {
-                    SalesChartPlaceholder()
+                    SalesChartSection(
+                        data = uiState.dailySales,
+                        period = uiState.selectedPeriod
+                    )
                 }
 
                 item {
@@ -133,50 +134,6 @@ fun DashboardScreen(
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
                 }
-            }
-        }
-    }
-}
-
-// TODO: terminar de fazer o gráfico
-@Composable
-private fun SalesChartPlaceholder() {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-
-        SectionTitle(
-            title = "Vendas"
-        )
-
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                Text(
-                    text = "📊",
-                    style = MaterialTheme.typography.displaySmall
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Gráfico de vendas",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "A evolução das vendas será exibida aqui.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }
