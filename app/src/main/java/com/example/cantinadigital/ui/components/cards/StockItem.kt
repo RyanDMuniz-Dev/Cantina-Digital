@@ -68,7 +68,7 @@ fun StockItemCard(
         ) {
             // Lado Esquerdo: Emoji + Informações Principais
             Row(
-                modifier = Modifier.weight(1f), // <-- Permite que esta seção tome todo o espaço disponível sem espremer a direita
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
