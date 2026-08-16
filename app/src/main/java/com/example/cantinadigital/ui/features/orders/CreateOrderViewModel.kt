@@ -10,6 +10,7 @@ import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.data.repository.OrderRepository
 import com.example.cantinadigital.data.repository.ProductRepository
 import com.example.cantinadigital.ui.features.orders.model.CreateOrderUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,12 +18,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CreateOrderViewModel(
-    private val orderRepository: OrderRepository = OrderRepository(),
-    private val productRepository: ProductRepository = ProductRepository(),
-    private val authRepository: AuthRepository = AuthRepository(),
-    private val auditLogRepository: AuditLogRepository = AuditLogRepository()
+@HiltViewModel
+class CreateOrderViewModel @Inject constructor(
+    private val orderRepository: OrderRepository,
+    private val productRepository: ProductRepository,
+    private val authRepository: AuthRepository,
+    private val auditLogRepository: AuditLogRepository
 ) : ViewModel() {
 
     private val _products = MutableStateFlow<List<Product>>(emptyList())

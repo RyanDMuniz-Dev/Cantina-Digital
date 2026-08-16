@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cantinadigital.ui.components.cards.AuditLogCard
 
@@ -37,7 +38,7 @@ import com.example.cantinadigital.ui.components.cards.AuditLogCard
 @Composable
 fun LogsScreen(
     onBackClick: () -> Unit = {},
-    viewModel: LogsViewModel = viewModel()
+    viewModel: LogsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedTabIndex by remember { mutableIntStateOf(0) }

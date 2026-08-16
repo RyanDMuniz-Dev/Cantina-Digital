@@ -35,7 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.cantinadigital.ui.components.cards.ConfirmedPayoutCard
 import com.example.cantinadigital.ui.components.cards.MetricCard
 import com.example.cantinadigital.ui.components.cards.SellerPayoutCard
@@ -46,7 +46,7 @@ import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
 @Composable
 fun InsightsScreen(
     modifier: Modifier = Modifier,
-    viewModel: InsightsViewModel = viewModel(),
+    viewModel: InsightsViewModel = hiltViewModel(),
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
@@ -66,14 +66,13 @@ fun InsightsScreen(
                 icon = { Icon(Icons.Default.Add, contentDescription = "Movimentar Caixa") },
                 text = { Text("Lançar Caixa") }
             )
-        }
+        },
     ) { innerPadding ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
         ) {
 
             Text(
@@ -92,7 +91,9 @@ fun InsightsScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 88.dp)
+                    contentPadding = PaddingValues(
+                        bottom = 88.dp
+                    )
                 ) {
 
                     item {

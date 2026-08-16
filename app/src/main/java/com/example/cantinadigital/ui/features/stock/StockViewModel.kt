@@ -9,17 +9,20 @@ import com.example.cantinadigital.data.repository.ProductRepository
 import com.example.cantinadigital.ui.features.stock.model.AddProductUiState
 import com.example.cantinadigital.ui.features.stock.model.DeleteProductUiState
 import com.example.cantinadigital.ui.features.stock.model.UpdateProductUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class StockViewModel(
-    private val repository: ProductRepository = ProductRepository(),
-    private val auditLogRepository: AuditLogRepository = AuditLogRepository(),
-    private val authRepository: AuthRepository = AuthRepository()
+@HiltViewModel
+class StockViewModel @Inject constructor(
+    private val repository: ProductRepository,
+    private val auditLogRepository: AuditLogRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _addProductState = MutableStateFlow<AddProductUiState>(AddProductUiState.Idle)

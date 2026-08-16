@@ -13,18 +13,21 @@ import com.example.cantinadigital.data.repository.OrderRepository
 import com.example.cantinadigital.data.repository.PayoutRepository
 import com.example.cantinadigital.ui.features.insights.model.InsightsUiState
 import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class InsightsViewModel(
-    private val orderRepository: OrderRepository = OrderRepository(),
-    private val financialRepository: FinancialRepository = FinancialRepository(),
-    private val payoutRepository: PayoutRepository = PayoutRepository(),
-    private val authRepository: AuthRepository = AuthRepository(),
-    private val auditLogRepository: AuditLogRepository = AuditLogRepository()
+@HiltViewModel
+class InsightsViewModel @Inject constructor(
+    private val orderRepository: OrderRepository,
+    private val financialRepository: FinancialRepository,
+    private val payoutRepository: PayoutRepository,
+    private val authRepository: AuthRepository,
+    private val auditLogRepository: AuditLogRepository
 ) : ViewModel() {
 
     private val _uiState =

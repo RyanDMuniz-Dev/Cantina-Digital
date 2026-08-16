@@ -8,11 +8,13 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class AuditLogRepository (
-  private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-  private val logPath: String = "audit_logs"
+class AuditLogRepository @Inject constructor (
+  private val firestore: FirebaseFirestore,
 ) {
+
+    private val logPath: String = "audit_logs"
 
     suspend fun logAction(
         type: String,

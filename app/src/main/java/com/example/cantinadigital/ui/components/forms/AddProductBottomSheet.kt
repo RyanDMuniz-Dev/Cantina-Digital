@@ -223,7 +223,7 @@ fun AddProductBottomSheet(
                     val sanitizedAmount = quantidade.trim().toIntOrNull() ?: 0
                     val sanitizedTax = if (isProductCantina) 0.0 else (cantinaTax.replace(",", ".").trim().toDoubleOrNull() ?: 0.0)
                     val sanitizedSeller = if (isProductCantina) "Cantina" else vendedor.trim()
-                    val sanitizedClass = sala.trim().uppercase()
+                    val sanitizedClass = if (isProductCantina) "WXY" else sala.trim().uppercase()
 
                     val newProduct = Product(
                         emoji = emoji.ifBlank { "📦" },

@@ -4,14 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cantinadigital.data.repository.AuditLogRepository
 import com.example.cantinadigital.ui.features.logs.model.LogsUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LogsViewModel (
-    private val auditLogRepository: AuditLogRepository = AuditLogRepository()
+@HiltViewModel
+class LogsViewModel @Inject constructor (
+    private val auditLogRepository: AuditLogRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LogsUiState())

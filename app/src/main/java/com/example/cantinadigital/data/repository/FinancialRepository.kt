@@ -7,11 +7,13 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class FinancialRepository(
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val transactionPath: String = "movimentacoes"
+class FinancialRepository @Inject constructor(
+    private val firestore: FirebaseFirestore,
 ) {
+
+    private val transactionPath: String = "movimentacoes"
 
     fun getTransactions(): Flow<List<FinancialTransaction>> = callbackFlow {
         val listener = firestore.collection(transactionPath)

@@ -8,12 +8,14 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class OrderRepository(
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val ordersPath: String = "pedidos",
-    private val productsPath: String = "produtos"
+class OrderRepository @Inject constructor(
+    private val firestore: FirebaseFirestore,
 ) {
+
+    private val ordersPath: String = "pedidos"
+    private val productsPath: String = "produtos"
 
     fun getOrderFlow(): Flow<List<Order>> = callbackFlow {
         val listener = firestore.collection(ordersPath)

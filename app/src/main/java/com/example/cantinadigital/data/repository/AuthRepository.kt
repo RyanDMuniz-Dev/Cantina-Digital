@@ -1,21 +1,14 @@
 package com.example.cantinadigital.data.repository
 
-import com.example.cantinadigital.data.remote.FirebaseProvider
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class AuthRepository {
-
-    private val auth = FirebaseProvider.auth
-    private val db = FirebaseProvider.db
-
-    fun getUsuarioAtual(): FirebaseUser? {
-        return auth.currentUser
-    }
-
-    fun isUserLoggedIn(): Boolean {
-        return auth.currentUser != null
-    }
+class AuthRepository @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val db: FirebaseFirestore
+) {
 
     /**
      * Função de Login (bifurcada com nome signIn para alinhar com o LoginScreenViewModel)

@@ -8,12 +8,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.security.MessageDigest
+import javax.inject.Inject
 
-class PayoutRepository(
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val payoutPath: String = "repasses",
-    private val controlPath: String = "repasses_controle"
+class PayoutRepository @Inject constructor(
+    private val firestore: FirebaseFirestore,
 ) {
+
+    private val payoutPath: String = "repasses"
+    private val controlPath: String = "repasses_controle"
 
     fun getPayouts(): Flow<List<Payout>> = callbackFlow {
 

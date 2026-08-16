@@ -4,17 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.ui.features.login.model.LoginFormState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginScreenViewModel (
-    private val previewMode: Boolean = false
+@HiltViewModel
+class LoginScreenViewModel @Inject constructor(
+    private val repository: AuthRepository,
 ) : ViewModel() {
 
-    val repository = if (previewMode) null else AuthRepository()
+    var previewMode: Boolean = false
+
     private val _uiState = MutableStateFlow(LoginFormState())
     val uiState: StateFlow<LoginFormState> = _uiState.asStateFlow()
 
