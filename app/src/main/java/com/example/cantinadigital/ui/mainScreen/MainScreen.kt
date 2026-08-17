@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,7 +21,6 @@ import com.example.cantinadigital.ui.features.insights.InsightsScreen
 import com.example.cantinadigital.ui.features.logs.LogsScreen
 import com.example.cantinadigital.ui.features.orders.OrdersScreen
 import com.example.cantinadigital.ui.features.stock.StockScreen
-import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 const val ROUTE_LOGS = "logs"
 
@@ -137,10 +135,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
 }
 
-@Preview
-@Composable
-private fun MainScreenPreview() {
-    CantinaDigitalTheme {
-        MainScreen()
-    }
-}
+//@Preview
+//@Composable
+//private fun MainScreenPreview() {
+//    CantinaDigitalTheme {
+//        MainScreen()
+//    }
+//}

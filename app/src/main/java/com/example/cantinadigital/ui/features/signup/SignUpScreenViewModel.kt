@@ -16,7 +16,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SignUpScreenViewModel @Inject constructor(
     private val repository: AuthRepository,
-
 ) : ViewModel() {
 
     var previewMode: Boolean = false

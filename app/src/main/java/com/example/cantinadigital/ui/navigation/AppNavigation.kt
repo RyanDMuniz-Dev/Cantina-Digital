@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -60,7 +61,7 @@ fun AppNavigation() {
     ) {
         composable(Screen.SignUp.route) {
             SignUpScreen(
-                viewModel = viewModel(),
+                viewModel = hiltViewModel(),
                 onSignUpSuccess = {
                     navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.SignUp.route) { inclusive = true }
@@ -74,7 +75,7 @@ fun AppNavigation() {
 
         composable(Screen.Login.route) {
             LoginScreen(
-                viewModel = viewModel(),
+                viewModel = hiltViewModel(),
                 onLoginSuccess = {
                     navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.SignUp.route) { inclusive = true }

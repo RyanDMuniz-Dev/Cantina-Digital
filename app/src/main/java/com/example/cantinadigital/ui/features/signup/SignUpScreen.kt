@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.cantinadigital.R
 import com.example.cantinadigital.ui.components.fields.FormTextField
 import com.example.cantinadigital.ui.components.fields.PasswordTextField
@@ -48,11 +49,10 @@ import com.example.cantinadigital.ui.theme.PrimaryBlueDark
 @Composable
 fun SignUpScreen(
     modifier: Modifier = Modifier,
-    viewModel: SignUpScreenViewModel,
     onSignUpSuccess: () -> Unit = {},
-    onNavigateToLogin: () -> Unit = {}
+    onNavigateToLogin: () -> Unit = {},
+    viewModel: SignUpScreenViewModel = hiltViewModel()
 ) {
-
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
@@ -215,14 +215,3 @@ fun SignUpScreen(
     }
 
 }
-
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//private fun SignUpScreenPreview() {
-//    CantinaDigitalTheme {
-//        SignUpScreen(
-//            modifier = Modifier,
-//            viewModel = SignUpScreenViewModel(previewMode = true)
-//        )
-//    }
-//}
