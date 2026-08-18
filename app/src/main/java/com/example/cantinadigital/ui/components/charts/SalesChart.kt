@@ -110,16 +110,19 @@ fun SalesChart(
 
 private fun formatChartCurrency(
     value: Double
-) : String {
+): String {
+    val ptBrLocale = Locale.forLanguageTag("pt-BR")
+
     return when {
         value >= 1000 ->
             "R$ %.1fk".format(
-                Locale("pt", "BR"),
+                ptBrLocale,
                 value / 1000
             )
         else -> "R$ %.0f".format(
-            Locale("pt", "BR"),
+            ptBrLocale,
             value
         )
     }
 }
+
