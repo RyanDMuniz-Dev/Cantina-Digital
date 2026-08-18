@@ -26,8 +26,6 @@ import com.example.cantinadigital.ui.components.sections.MostSoldProductSection
 import com.example.cantinadigital.ui.components.sections.SalesChartSection
 import com.example.cantinadigital.ui.components.sections.TopProductsSection
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -152,17 +150,6 @@ fun SectionTitle(
 
 fun formatCurrency(value: Double): String {
     return NumberFormat
-        .getCurrencyInstance(Locale("pt", "BR"))
+        .getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
         .format(value)
-}
-
-private fun formatTime(date: Date?): String {
-    if (date == null) {
-        return "--:--"
-    }
-
-    return SimpleDateFormat(
-        "HH:mm",
-        Locale.getDefault()
-    ).format(date)
 }
