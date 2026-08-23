@@ -160,7 +160,8 @@ fun InsightsScreen(
                                     text = {
                                         Text(
                                             text = title,
-                                            fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal
+                                            fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 )
