@@ -110,56 +110,19 @@ fun SalesChart(
 
 private fun formatChartCurrency(
     value: Double
-) : String {
+): String {
+    val ptBrLocale = Locale.forLanguageTag("pt-BR")
+
     return when {
         value >= 1000 ->
             "R$ %.1fk".format(
-                Locale("pt", "BR"),
+                ptBrLocale,
                 value / 1000
             )
         else -> "R$ %.0f".format(
-            Locale("pt", "BR"),
+            ptBrLocale,
             value
         )
     }
 }
 
-private fun getXAxisItemPlacer(
-    period: DashboardPeriod,
-    dataSize: Int
-): HorizontalAxis.ItemPlacer {
-
-    return when (period) {
-
-        DashboardPeriod.TODAY -> {
-            HorizontalAxis.ItemPlacer.aligned(
-                spacing = { 1 }
-            )
-        }
-
-        DashboardPeriod.LAST_7_DAYS -> {
-            HorizontalAxis.ItemPlacer.aligned(
-                spacing = { 1 }
-            )
-        }
-
-        DashboardPeriod.LAST_30_DAYS -> {
-            HorizontalAxis.ItemPlacer.aligned(
-                spacing = { 5 }
-            )
-        }
-
-        DashboardPeriod.ALL -> {
-            val spacing = when {
-                dataSize <= 7 -> 1
-                dataSize <= 30 -> 5
-                dataSize <= 100 -> 10
-                else -> dataSize / 8
-            }
-
-            HorizontalAxis.ItemPlacer.aligned(
-                spacing = { spacing.coerceAtLeast(1) }
-            )
-        }
-    }
-}
