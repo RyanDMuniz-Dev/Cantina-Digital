@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Canvas
 import androidx.core.content.ContextCompat
 import java.text.NumberFormat
 import java.util.Locale
