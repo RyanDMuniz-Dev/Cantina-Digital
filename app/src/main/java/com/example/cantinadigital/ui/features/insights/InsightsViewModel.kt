@@ -1,5 +1,6 @@
 package com.example.cantinadigital.ui.features.insights
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cantinadigital.data.model.FinancialTransaction
@@ -12,17 +13,25 @@ import com.example.cantinadigital.data.repository.FinancialRepository
 import com.example.cantinadigital.data.repository.OrderRepository
 import com.example.cantinadigital.data.repository.PayoutRepository
 import com.example.cantinadigital.ui.features.dashboard.model.DashboardPeriod
+import com.example.cantinadigital.ui.features.insights.model.DailySalesReport
 import com.example.cantinadigital.ui.features.insights.model.InsightsUiState
 import com.example.cantinadigital.ui.features.insights.model.ProductSalesSummary
 import com.example.cantinadigital.ui.features.insights.model.SalesAnalysis
+import com.example.cantinadigital.ui.features.insights.model.SalesReportData
 import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
+import com.example.cantinadigital.utils.pdf.PdfShareHelper
+import com.example.cantinadigital.utils.pdf.SalesReportGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,7 +52,9 @@ class InsightsViewModel @Inject constructor(
     val employeeInfo: StateFlow<String> = _employeeInfo.asStateFlow()
 
     private val _selectedPeriod = MutableStateFlow(DashboardPeriod.ALL)
-    val selectedPeriod: StateFlow<DashboardPeriod> = _selectedPeriod.asStateFlow()
+
+    private var latestOrders: List<Order> = emptyList()
+    private var latestTransactions: List<FinancialTransaction> = emptyList()
 
     init {
         loadData()
@@ -60,6 +71,9 @@ class InsightsViewModel @Inject constructor(
                 payoutRepository.getPayouts(),
                 _selectedPeriod
             ) { orders, transactions, payouts, period ->
+
+                latestOrders = orders
+                latestTransactions = transactions
 
                 processInsights(
                     orders = orders,
@@ -295,6 +309,61 @@ class InsightsViewModel @Inject constructor(
 
     }
 
+    private fun buildDailySalesReport(
+        orders: List<Order>
+    ): List<DailySalesReport> {
+
+        val displayFormatter = SimpleDateFormat(
+            "dd/MM/yyyy",
+            Locale("pt", "BR")
+        )
+
+        return orders
+            .filter { it.dateTime != null }
+            .groupBy { order ->
+
+                val date = order.dateTime!!.toDate()
+
+                date.toInstant()
+                    .toString()
+                    .substring(0, 10)
+            }
+            .map { (_, dailyOrders) ->
+
+                val date = dailyOrders
+                    .first()
+                    .dateTime!!
+                    .toDate()
+
+                DailySalesReport(
+
+                    date = displayFormatter.format(date),
+
+                    totalOrders =
+                        dailyOrders.size,
+
+                    totalItems =
+                        dailyOrders.sumOf { order ->
+                            order.items.sumOf { item ->
+                                item.amount
+                            }
+                        },
+
+                    revenue =
+                        dailyOrders.sumOf {
+                            it.totalValue
+                        }
+                )
+            }
+            .sortedBy { dailySale ->
+
+                SimpleDateFormat(
+                    "dd/MM/yyyy",
+                    Locale("pt", "BR")
+                ).parse(dailySale.date)
+            }
+    }
+
     private fun filterOrdersByPeriod(
         orders: List<Order>,
         period: DashboardPeriod
@@ -330,6 +399,188 @@ class InsightsViewModel @Inject constructor(
             val timestamp = order.dateTime ?: return@filter false
 
             timestamp.toDate().time >= startTime
+        }
+    }
+
+    private fun filterTransactionsByPeriod(
+        transactions: List<FinancialTransaction>,
+        period: DashboardPeriod
+    ): List<FinancialTransaction> {
+
+        if (period == DashboardPeriod.ALL) {
+            return transactions
+        }
+
+        val now = System.currentTimeMillis()
+
+        val startTime = when (period) {
+
+            DashboardPeriod.TODAY -> {
+                Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+            }
+
+            DashboardPeriod.LAST_7_DAYS -> {
+                now - (7L * 24L * 60L * 60L * 1000L)
+            }
+
+            DashboardPeriod.LAST_30_DAYS -> {
+                now - (30L * 24L * 60L * 60L * 1000L)
+            }
+
+        }
+
+        return transactions.filter { transaction ->
+
+            val timestamp =
+                transaction.dataHora ?: return@filter false
+
+            timestamp.toDate().time >= startTime
+        }
+    }
+
+    fun generateSalesReport(context: Context) {
+
+        viewModelScope.launch {
+
+            _uiState.update {
+                it.copy(isGeneratingReport = true)
+            }
+
+            try {
+
+                val period = _selectedPeriod.value
+
+                val filteredOrders = filterOrdersByPeriod(
+                    orders = latestOrders,
+                    period = period
+                )
+
+                val filteredTransactions = filterTransactionsByPeriod(
+                    transactions = latestTransactions,
+                    period = period
+                )
+
+                val salesAnalysis = buildSalesAnalysis(
+                    orders = latestOrders,
+                    period = period
+                )
+
+                val dailySales = buildDailySalesReport(
+                    orders = filteredOrders
+                )
+
+                val totalExits = filteredTransactions
+                    .filter {
+                        it.tipo.equals(
+                            "SAIDA",
+                            ignoreCase = true
+                        )
+                    }
+                    .sumOf { it.valor }
+
+                val totalManualEntry = filteredTransactions
+                    .filter {
+                        it.tipo.equals(
+                            "ENTRADA",
+                            ignoreCase = true
+                        )
+                    }
+                    .sumOf { it.valor }
+
+                /*
+                 * Calculamos os valores financeiros usando apenas
+                 * os pedidos pertencentes ao período selecionado.
+                 */
+
+                var ownProductsRevenue = 0.0
+                var cantinaRoyalties = 0.0
+
+                filteredOrders.forEach { order ->
+
+                    order.items.forEach { item ->
+
+                        val itemTotal =
+                            item.unitValue * item.amount
+
+                        if (
+                            item.vendedor.equals(
+                                "Cantina",
+                                ignoreCase = true
+                            )
+                        ) {
+                            ownProductsRevenue += itemTotal
+                        } else {
+
+                            val taxPercent =
+                                item.taxaCantina / 100.0
+
+                            cantinaRoyalties +=
+                                itemTotal * taxPercent
+                        }
+                    }
+                }
+
+                val totalBalance =
+                    (
+                            ownProductsRevenue +
+                                    cantinaRoyalties +
+                                    totalManualEntry
+                            ) - totalExits
+
+                val report = SalesReportData(
+
+                    periodLabel = period.label,
+
+                    generatedAt = SimpleDateFormat(
+                        "dd/MM/yyyy HH:mm",
+                        Locale("pt", "BR")
+                    ).format(Date()),
+
+                    totalOrders =
+                        salesAnalysis.totalOrders,
+
+                    totalItemsSold =
+                        salesAnalysis.totalItemsSold,
+
+                    totalRevenue =
+                        salesAnalysis.totalRevenue,
+
+                    cantinaRoyalties =
+                        cantinaRoyalties,
+
+                    totalBalance =
+                        totalBalance,
+
+                    products =
+                        salesAnalysis.product,
+
+                    dailySales =
+                        dailySales
+                )
+
+                val pdfFile = SalesReportGenerator.generate(
+                    context = context,
+                    report = report
+                )
+
+                PdfShareHelper.sharePdf(
+                    context = context,
+                    file = pdfFile
+                )
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+            } finally {
+                _uiState.update {
+                    it.copy(isGeneratingReport = false)
+                }
+            }
         }
     }
 

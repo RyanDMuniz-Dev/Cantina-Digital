@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -43,7 +44,6 @@ import com.example.cantinadigital.ui.components.cards.SellerPayoutCard
 import com.example.cantinadigital.ui.components.dialogs.AddTransactionDialog
 import com.example.cantinadigital.ui.components.dialogs.ConfirmPayoutDialog
 import com.example.cantinadigital.ui.components.selectors.PeriodSelector
-import com.example.cantinadigital.ui.features.insights.model.SalesAnalysis
 import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
 
 @Composable
@@ -51,6 +51,8 @@ fun InsightsScreen(
     modifier: Modifier = Modifier,
     viewModel: InsightsViewModel = hiltViewModel(),
 ) {
+
+    val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsState()
     var showAddTransactionDialog by remember { mutableStateOf(false) }
@@ -173,7 +175,11 @@ fun InsightsScreen(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             SalesAnalysisCard(
-                                analysis = uiState.salesAnalysis
+                                analysis = uiState.salesAnalysis,
+                                isGeneratingReport = uiState.isGeneratingReport,
+                                onGenerateReport = {
+                                    viewModel.generateSalesReport(context)
+                                }
                             )
                         }
                     }

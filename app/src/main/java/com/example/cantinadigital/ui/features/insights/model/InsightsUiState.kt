@@ -17,5 +17,6 @@ data class InsightsUiState(
 
     val isLoading: Boolean = true,
     val isProcessingPayout: Boolean = false,
+    val isGeneratingReport: Boolean = false,
     val payoutError: String? = null
 )
