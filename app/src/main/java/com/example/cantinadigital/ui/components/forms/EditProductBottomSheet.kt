@@ -1,20 +1,28 @@
 package com.example.cantinadigital.ui.components.forms
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,14 +35,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.cantinadigital.R
 import com.example.cantinadigital.data.model.Product
 import com.example.cantinadigital.ui.components.fields.SimpleFormTextField
-import com.example.cantinadigital.ui.features.stock.StockContent
-import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
-import org.w3c.dom.Text
+import com.example.cantinadigital.ui.components.radio.ProductOriginOption
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,11 +79,44 @@ fun EditProductBottomSheet(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Editar Produto",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.size(48.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = emoji.ifBlank { "📦" },
+                            fontSize = 24.sp
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Editar produto",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text(
+                        text = name.ifBlank { "Produto sem nome" },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
 
             // Linha 1: Emoji + Nome
             Row(
@@ -132,90 +172,162 @@ fun EditProductBottomSheet(
                 )
             }
 
-            Text(
-                text = "Vendedor do Produto",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = isProductCantina,
-                        onClick = { isProductCantina = true }
-                    )
-                    Text("Cantina")
-                }
+                Text(
+                    text = "Origem do produto",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = !isProductCantina,
-                        onClick = { isProductCantina = false }
-                    )
-                    Text("Aluno")
-                }
-            }
+                Text(
+                    text = "Defina quem é responsável pelo produto.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
-            if (!isProductCantina) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = seller,
-                        onValueChange = { seller = it },
-                        label = { Text("Nome do Aluno") },
-                        modifier = Modifier.weight(0.6f),
-                        singleLine = true
+                    ProductOriginOption(
+                        modifier = Modifier.weight(1f),
+                        title = "Cantina",
+                        description = "Produto próprio",
+                        selected = isProductCantina,
+                        onClick = {
+                            isProductCantina = true
+                        }
                     )
 
-                    OutlinedTextField(
-                        value = cantinaTax,
-                        onValueChange = { cantinaTax = it },
-                        label = { Text("Taxa (%)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.weight(0.4f),
-                        singleLine = true
+                    ProductOriginOption(
+                        modifier = Modifier.weight(1f),
+                        title = "Aluno",
+                        description = "Produto de aluno",
+                        selected = !isProductCantina,
+                        onClick = {
+                            isProductCantina = false
+                        }
                     )
+                }
+            }
+
+            if (!isProductCantina) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+
+                    Text(
+                        text = "Informações do vendedor",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = seller,
+                            onValueChange = { seller = it },
+                            label = { Text("Nome do aluno") },
+                            modifier = Modifier.weight(0.6f),
+                            singleLine = true
+                        )
+
+                        OutlinedTextField(
+                            value = cantinaTax,
+                            onValueChange = { cantinaTax = it },
+                            label = { Text("Taxa (%)") },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal
+                            ),
+                            modifier = Modifier.weight(0.4f),
+                            singleLine = true
+                        )
+
+                    }
+
                 }
             }
 
             // Botão Salvar Alterações
             Button(
                 onClick = {
-                    val sanitizedValue = value.replace(",", ".").trim().toDoubleOrNull() ?: 0.0
-                    val sanitizedAmount = amount.trim().toIntOrNull() ?: 0
-                    val sanitizedTax = if (isProductCantina) 0.0 else (cantinaTax.replace(",", ".").trim().toDoubleOrNull() ?: 0.0)
-                    val sanitizedSeller = if (isProductCantina) "Cantina" else seller.trim()
+                    val sanitizedValue =
+                        value.replace(",", ".").trim().toDoubleOrNull() ?: 0.0
+
+                    val sanitizedAmount =
+                        amount.trim().toIntOrNull() ?: 0
+
+                    val sanitizedTax =
+                        if (isProductCantina) {
+                            0.0
+                        } else {
+                            cantinaTax
+                                .replace(",", ".")
+                                .trim()
+                                .toDoubleOrNull() ?: 0.0
+                        }
+
+                    val sanitizedSeller =
+                        if (isProductCantina) {
+                            "Cantina"
+                        } else {
+                            seller.trim()
+                        }
 
                     val updatedProduct = productToEdit.copy(
                         emoji = emoji.ifBlank { "📦" },
-                        nome = name,
+                        nome = name.trim(),
                         valor = sanitizedValue,
                         quantidade = sanitizedAmount,
                         vendedor = sanitizedSeller,
                         cantinaTaxa = sanitizedTax
                     )
+
                     onConfirmUpdate(updatedProduct)
                 },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = isFormValid
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                enabled = isFormValid,
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Salvar Alterações")
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null
+                )
+
+                Spacer(
+                    modifier = Modifier.width(8.dp)
+                )
+
+                Text("Salvar alterações")
             }
 
             // Botão Excluir Produto (Estilo de Alerta/Erro)
-            OutlinedButton(
-                onClick = { showDeleteConfirmation = true },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error
-                )
+            TextButton(
+                onClick = {
+                    showDeleteConfirmation = true
+                },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Excluir Produto")
+                Icon(
+                    imageVector = Icons.Default.DeleteOutline,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+
+                Spacer(
+                    modifier = Modifier.width(8.dp)
+                )
+
+                Text(
+                    text = "Excluir produto",
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         }
     }

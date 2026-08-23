@@ -32,9 +32,16 @@ fun MostSoldProductSection(
             title = "🏆 Produto mais vendido"
         )
 
+        Text(
+            text = "Produto com maior quantidade de unidades vendidas.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
+
             if (product == null) {
 
                 Column(
@@ -61,18 +68,23 @@ fun MostSoldProductSection(
                         style = MaterialTheme.typography.displaySmall
                     )
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(
+                        modifier = Modifier.width(16.dp)
+                    )
 
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
+
                         Text(
                             text = product.productName,
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(
+                            modifier = Modifier.height(4.dp)
+                        )
 
                         Text(
                             text = "${product.quantitySold} unidades vendidas",
@@ -80,12 +92,21 @@ fun MostSoldProductSection(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(
+                            modifier = Modifier.height(6.dp)
+                        )
 
                         Text(
-                            text = "${formatCurrency(product.revenue)} em vendas",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold
+                            text = formatCurrency(product.revenue),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Text(
+                            text = "em vendas",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

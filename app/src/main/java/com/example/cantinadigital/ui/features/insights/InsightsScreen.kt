@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
@@ -80,13 +79,20 @@ fun InsightsScreen(
                 .padding(innerPadding)
         ) {
 
-            Text(
-                text = "Insights e Repasses",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 20.dp
+                    )
+            ) {
+                Text(
+                    text = "Insights e Repasses",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -97,21 +103,41 @@ fun InsightsScreen(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(
-                        bottom = 88.dp
+                        bottom = 88.dp,
                     )
                 ) {
 
                     item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    horizontal = 20.dp,
+                                )
+                        ) {
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = "Acompanhe o desempenho financeiro e os repasses aos vendedores.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    item {
+
                         Row(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             MetricCard(
                                 modifier = Modifier.weight(1f),
                                 title = "Bruto Total",
                                 value = "R$ %.2f".format(uiState.totalRevenue),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
                             )
+
                             MetricCard(
                                 modifier = Modifier.weight(1f),
                                 title = "Taxa Cantina",
@@ -124,45 +150,43 @@ fun InsightsScreen(
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                            )
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            Column(
+                                modifier = Modifier.padding(16.dp)
                             ) {
-                                Column {
-                                    Text(
-                                        text = "Saldo Atual em Caixa",
-                                        style = MaterialTheme.typography.labelLarge
-                                    )
-                                    Text(
-                                        text = "R$ %.2f".format(uiState.totalBalance),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(
-                                            alpha = 0.8f
-                                        )
-                                    )
-                                }
+                                Text(
+                                    text = "Saldo atual em caixa",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                Text(
+                                    text = "R$ %.2f".format(uiState.totalBalance),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
                             }
                         }
                     }
 
                     item {
                         Column(
-                            modifier = Modifier.fillMaxWidth()
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Análise de Vendas",
-                                    style = MaterialTheme.typography.titleLarge,
+                                    text = "Análise de vendas",
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
 
@@ -171,8 +195,6 @@ fun InsightsScreen(
                                     onPeriodSelected = viewModel::selectPeriod
                                 )
                             }
-
-                            Spacer(modifier = Modifier.height(8.dp))
 
                             SalesAnalysisCard(
                                 analysis = uiState.salesAnalysis,
@@ -186,67 +208,115 @@ fun InsightsScreen(
 
                     // Componente de Abas exatamente na posição indicada!
                     item {
-                        SecondaryTabRow(
-                            selectedTabIndex = selectedTabIndex,
+                        Card(
                             modifier = Modifier.fillMaxWidth(),
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.primary
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
                         ) {
-                            tabs.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTabIndex == index,
-                                    onClick = { selectedTabIndex = index },
-                                    text = {
-                                        Text(
-                                            text = title,
-                                            fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            Column(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+
+                                Text(
+                                    text = "Repasses",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(
+                                        start = 16.dp,
+                                        end = 16.dp,
+                                        top = 16.dp,
+                                        bottom = 8.dp
+                                    )
+                                )
+
+                                SecondaryTabRow(
+                                    selectedTabIndex = selectedTabIndex,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    containerColor = MaterialTheme.colorScheme.surface,
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                ) {
+                                    tabs.forEachIndexed { index, title ->
+                                        Tab(
+                                            selected = selectedTabIndex == index,
+                                            onClick = { selectedTabIndex = index },
+                                            text = {
+                                                Text(
+                                                    text = title,
+                                                    fontWeight =
+                                                        if (selectedTabIndex == index)
+                                                            FontWeight.Bold
+                                                        else
+                                                            FontWeight.Normal
+                                                )
+                                            }
                                         )
                                     }
+                                }
+
+                                Spacer(
+                                    modifier = Modifier.height(12.dp)
+                                )
+
+                                if (selectedTabIndex == 0) {
+
+                                    if (uiState.sellersRoyalties.isEmpty()) {
+                                        Text(
+                                            text = "Nenhum repasse pendente no momento.",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(
+                                                horizontal = 16.dp,
+                                                vertical = 16.dp
+                                            )
+                                        )
+                                    } else {
+                                        uiState.sellersRoyalties.forEach { summary ->
+                                            SellerPayoutCard(
+                                                summary = summary,
+                                                onConfirmPayoutSummary = {
+                                                    selectPayoutForConfirmation = summary
+                                                }
+                                            )
+
+                                            Spacer(
+                                                modifier = Modifier.height(8.dp)
+                                            )
+                                        }
+                                    }
+
+                                } else {
+
+                                    if (uiState.confirmedPayouts.isEmpty()) {
+                                        Text(
+                                            text = "Nenhum repasse foi realizado ainda.",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(
+                                                horizontal = 16.dp,
+                                                vertical = 16.dp
+                                            )
+                                        )
+                                    } else {
+                                        uiState.confirmedPayouts.forEach { payout ->
+                                            ConfirmedPayoutCard(
+                                                payout = payout
+                                            )
+
+                                            Spacer(
+                                                modifier = Modifier.height(8.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Spacer(
+                                    modifier = Modifier.height(8.dp)
                                 )
                             }
                         }
                     }
 
-                    // 2. Renderização de acordo com a aba selecionada
-                    if (selectedTabIndex == 0) {
-                        // ABA: A CONFIRMAR (PENDENTES)
-                        if (uiState.sellersRoyalties.isEmpty()) {
-                            item {
-                                Text(
-                                    text = "Nenhum repasse pendente momento!",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(vertical = 16.dp)
-                                )
-                            }
-                        } else {
-                            items(uiState.sellersRoyalties) { summary ->
-                                SellerPayoutCard(
-                                    summary = summary,
-                                    onConfirmPayoutSummary = {
-                                        selectPayoutForConfirmation = summary
-                                    }
-                                )
-                            }
-                        }
-                    } else {
-                        // ABA: REPASSADOS (HISTÓRICO)
-                        if (uiState.confirmedPayouts.isEmpty()) {
-                            item {
-                                Text(
-                                    text = "Nenhum repasse foi realizado ainda.",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(vertical = 16.dp)
-                                )
-                            }
-                        } else {
-                            items(uiState.confirmedPayouts) { payout ->
-                                ConfirmedPayoutCard(payout = payout)
-                            }
-                        }
-                    }
                 } // end lazy column
             }
         }

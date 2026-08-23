@@ -1,15 +1,21 @@
 package com.example.cantinadigital.ui.components.forms
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +33,7 @@ import com.example.cantinadigital.R
 import com.example.cantinadigital.data.model.Product
 import com.example.cantinadigital.ui.components.buttons.PrimaryLoadingButton
 import com.example.cantinadigital.ui.components.fields.SimpleFormTextField
+import com.example.cantinadigital.ui.components.radio.ProductOriginOption
 import com.example.cantinadigital.ui.components.selectors.SelectorBox
 import com.example.cantinadigital.ui.features.signup.model.ThirdYearClass
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
@@ -69,11 +76,43 @@ fun AddProductBottomSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            Text(
-                text = "Add new product",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.size(46.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Inventory2,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Adicionar produto",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text(
+                        text = "Cadastre um novo item no estoque.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -129,34 +168,41 @@ fun AddProductBottomSheet(
             }
 
             // origin selector
-            Text(
-                text = "Vendedor do produto",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Row(
-                modifier = Modifier,
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = isProductCantina,
-                        onClick = { isProductCantina = true }
-                    )
-                    Text(
-                        text = "Cantina"
-                    )
-                }
+                Text(
+                    text = "Origem do produto",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = !isProductCantina,
-                        onClick = { isProductCantina = false }
+                Text(
+                    text = "Defina quem é responsável pelo produto.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ProductOriginOption(
+                        title = "Cantina",
+                        description = "Produto próprio",
+                        selected = isProductCantina,
+                        onClick = {
+                            isProductCantina = true
+                        }
                     )
-                    Text(
-                        text = "Aluno"
+
+                    ProductOriginOption(
+                        title = "Aluno",
+                        description = "Produto de aluno",
+                        selected = !isProductCantina,
+                        onClick = {
+                            isProductCantina = false
+                        }
                     )
                 }
             }
@@ -170,7 +216,7 @@ fun AddProductBottomSheet(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.Top // 1. Alinha todos os elementos pelo topo
+                        verticalAlignment = Alignment.Top
                     ) {
                         SimpleFormTextField(
                             modifier = Modifier.weight(0.7f),
@@ -186,11 +232,12 @@ fun AddProductBottomSheet(
                         SelectorBox(
                             modifier = Modifier
                                 .weight(0.3f)
-                                .padding(top = 13.dp), // 2. Desce o caixa do Selector em 8dp para emparelhar com a borda do TextField
+                                .padding(top = 13.dp),
                             classList = listOf("W", "X", "Y"),
                             selectedClass = selectedClassEnum,
                             onClassSelected = { selectedString ->
                                 sala = selectedString
+
                                 selectedClassEnum = runCatching {
                                     ThirdYearClass.valueOf(selectedString)
                                 }.getOrDefault(ThirdYearClass.W)
@@ -199,7 +246,9 @@ fun AddProductBottomSheet(
                     }
 
                     SimpleFormTextField(
-                        modifier = Modifier.fillMaxWidth().padding(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(),
                         value = cantinaTax,
                         label = R.string.tax,
                         singleLine = true,
