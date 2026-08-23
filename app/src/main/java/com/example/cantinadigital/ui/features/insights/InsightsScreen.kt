@@ -38,9 +38,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.cantinadigital.ui.components.cards.ConfirmedPayoutCard
 import com.example.cantinadigital.ui.components.cards.MetricCard
+import com.example.cantinadigital.ui.components.cards.SalesAnalysisCard
 import com.example.cantinadigital.ui.components.cards.SellerPayoutCard
 import com.example.cantinadigital.ui.components.dialogs.AddTransactionDialog
 import com.example.cantinadigital.ui.components.dialogs.ConfirmPayoutDialog
+import com.example.cantinadigital.ui.components.selectors.PeriodSelector
+import com.example.cantinadigital.ui.features.insights.model.SalesAnalysis
 import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
 
 @Composable
@@ -51,7 +54,7 @@ fun InsightsScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     var showAddTransactionDialog by remember { mutableStateOf(false) }
-    var selectPayoutForConfimation by remember { mutableStateOf<SellerPayoutSummary?>(null) }
+    var selectPayoutForConfirmation by remember { mutableStateOf<SellerPayoutSummary?>(null) }
 
     val employeeInfo by viewModel.employeeInfo.collectAsState()
 
@@ -145,7 +148,37 @@ fun InsightsScreen(
                         }
                     }
 
-                    // 1. Componente de Abas exatamente na posição indicada!
+                    item {
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Análise de Vendas",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                PeriodSelector(
+                                    selectedPeriod = uiState.selectedPeriod,
+                                    onPeriodSelected = viewModel::selectPeriod
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            SalesAnalysisCard(
+                                analysis = uiState.salesAnalysis
+                            )
+                        }
+                    }
+
+                    // Componente de Abas exatamente na posição indicada!
                     item {
                         SecondaryTabRow(
                             selectedTabIndex = selectedTabIndex,
@@ -186,7 +219,7 @@ fun InsightsScreen(
                                 SellerPayoutCard(
                                     summary = summary,
                                     onConfirmPayoutSummary = {
-                                        selectPayoutForConfimation = summary
+                                        selectPayoutForConfirmation = summary
                                     }
                                 )
                             }
@@ -224,15 +257,15 @@ fun InsightsScreen(
         }
 
         // Diálogo de confirmação de repasse
-        selectPayoutForConfimation?.let { summary ->
+        selectPayoutForConfirmation?.let { summary ->
             ConfirmPayoutDialog(
                 summary = summary,
                 isProcessing = uiState.isProcessingPayout,
                 funcionarioNome = employeeInfo,
-                onDismissRequest = { selectPayoutForConfimation = null },
+                onDismissRequest = { selectPayoutForConfirmation = null },
                 onConfirm = {
                     viewModel.confirmPayout(summary)
-                    selectPayoutForConfimation = null
+                    selectPayoutForConfirmation = null
                 }
             )
         }

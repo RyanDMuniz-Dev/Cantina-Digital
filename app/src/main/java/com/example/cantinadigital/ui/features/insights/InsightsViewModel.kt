@@ -11,7 +11,10 @@ import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.data.repository.FinancialRepository
 import com.example.cantinadigital.data.repository.OrderRepository
 import com.example.cantinadigital.data.repository.PayoutRepository
+import com.example.cantinadigital.ui.features.dashboard.model.DashboardPeriod
 import com.example.cantinadigital.ui.features.insights.model.InsightsUiState
+import com.example.cantinadigital.ui.features.insights.model.ProductSalesSummary
+import com.example.cantinadigital.ui.features.insights.model.SalesAnalysis
 import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,15 +34,16 @@ class InsightsViewModel @Inject constructor(
     private val auditLogRepository: AuditLogRepository
 ) : ViewModel() {
 
-    private val _uiState =
-        MutableStateFlow(InsightsUiState())
+    private val _uiState = MutableStateFlow(InsightsUiState())
 
-    val uiState: StateFlow<InsightsUiState> =
-        _uiState.asStateFlow()
+    val uiState: StateFlow<InsightsUiState> = _uiState.asStateFlow()
 
     private val _employeeInfo = MutableStateFlow("")
 
     val employeeInfo: StateFlow<String> = _employeeInfo.asStateFlow()
+
+    private val _selectedPeriod = MutableStateFlow(DashboardPeriod.ALL)
+    val selectedPeriod: StateFlow<DashboardPeriod> = _selectedPeriod.asStateFlow()
 
     init {
         loadData()
@@ -52,13 +57,15 @@ class InsightsViewModel @Inject constructor(
             combine(
                 orderRepository.getOrderFlow(),
                 financialRepository.getTransactions(),
-                payoutRepository.getPayouts()
-            ) { orders, transactions, payouts ->
+                payoutRepository.getPayouts(),
+                _selectedPeriod
+            ) { orders, transactions, payouts, period ->
 
                 processInsights(
                     orders = orders,
                     transactions = transactions,
-                    payouts = payouts
+                    payouts = payouts,
+                    selectedPeriod = period
                 )
 
             }.collect { state ->
@@ -71,7 +78,8 @@ class InsightsViewModel @Inject constructor(
     private fun processInsights(
         orders: List<Order>,
         transactions: List<FinancialTransaction>,
-        payouts: List<Payout>
+        payouts: List<Payout>,
+        selectedPeriod: DashboardPeriod
     ): InsightsUiState {
 
         var totalRevenue = 0.0
@@ -197,6 +205,11 @@ class InsightsViewModel @Inject constructor(
             )
         }
 
+        val salesAnalysis = buildSalesAnalysis(
+            orders = orders,
+            period = selectedPeriod
+        )
+
         return InsightsUiState(
             totalRevenue = totalRevenue,
             cantinaRoyalties = cantinaRoyalties,
@@ -204,8 +217,120 @@ class InsightsViewModel @Inject constructor(
             totalBalance = balance,
             sellersRoyalties = repassesList,
             confirmedPayouts = payouts,
+
+            selectedPeriod = selectedPeriod,
+            salesAnalysis = salesAnalysis,
+
             isLoading = false
         )
+    }
+
+    private fun createPayoutKey(
+        orderId: String,
+        sellerName: String
+    ): String {
+
+        return "${orderId}|${sellerName.trim().lowercase()}"
+    }
+
+    private fun buildSalesAnalysis(
+        orders: List<Order>,
+        period: DashboardPeriod
+    ) : SalesAnalysis {
+
+        val filteredOrders = filterOrdersByPeriod(
+            orders = orders,
+            period = period
+        )
+
+        val productMap = mutableMapOf<String, ProductSalesSummary>()
+
+        var totalItemsSold = 0
+        var totalRevenue = 0.0
+
+        filteredOrders.forEach { order ->
+
+            totalRevenue += order.totalValue
+
+            order.items.forEach { item ->
+
+                val itemRevenue = item.unitValue * item.amount
+
+                totalItemsSold += item.amount
+
+                val key = item.productId.ifBlank {
+                    item.name.trim().lowercase()
+                }
+
+                val existing = productMap[key]
+
+                if (existing == null) {
+
+                    productMap[key] = ProductSalesSummary(
+                        productId = item.productId,
+                        productName = item.name,
+                        quantitySold = item.amount,
+                        revenue = itemRevenue
+                    )
+
+                } else {
+
+                    productMap[key] = existing.copy(
+                        quantitySold = existing.quantitySold + item.amount,
+                        revenue = existing.revenue + itemRevenue
+                    )
+
+                }
+
+            }
+
+        }
+
+        return SalesAnalysis(
+            totalOrders = filteredOrders.size,
+            totalItemsSold = totalItemsSold,
+            totalRevenue = totalRevenue,
+            product = productMap.values.sortedByDescending { it.quantitySold }
+        )
+
+    }
+
+    private fun filterOrdersByPeriod(
+        orders: List<Order>,
+        period: DashboardPeriod
+    ): List<Order> {
+
+        val now = System.currentTimeMillis()
+
+        val startTime = when (period) {
+
+            DashboardPeriod.ALL -> {
+                return orders
+            }
+
+            DashboardPeriod.TODAY -> {
+                Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+            }
+
+            DashboardPeriod.LAST_7_DAYS -> {
+                now - (7L * 24L * 60L * 60L * 1000L)
+            }
+
+            DashboardPeriod.LAST_30_DAYS -> {
+                now - (30L * 24L * 60L * 60L * 1000L)
+            }
+        }
+
+        return orders.filter { order ->
+            val timestamp = order.dateTime ?: return@filter false
+
+            timestamp.toDate().time >= startTime
+        }
     }
 
     fun confirmPayout(summary: SellerPayoutSummary) {
@@ -292,11 +417,8 @@ class InsightsViewModel @Inject constructor(
         }
     }
 
-    private fun createPayoutKey(
-        orderId: String,
-        sellerName: String
-    ): String {
-
-        return "${orderId}|${sellerName.trim().lowercase()}"
+    fun selectPeriod(period: DashboardPeriod) {
+        _selectedPeriod.value = period
     }
+
 }
