@@ -2,7 +2,6 @@ package com.example.cantinadigital.ui.features.stock
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,12 +10,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,29 +32,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.cantinadigital.data.model.Product
 import com.example.cantinadigital.ui.components.cards.StockItemCard
 import com.example.cantinadigital.ui.components.forms.AddProductBottomSheet
 import com.example.cantinadigital.ui.components.forms.EditProductBottomSheet
 import com.example.cantinadigital.ui.features.stock.model.AddProductUiState
 
-// Componente principal que se conecta ao ViewModel
 @Composable
 fun StockScreen(
     modifier: Modifier = Modifier,
-    viewModel: StockViewModel = viewModel()
+    viewModel: StockViewModel = hiltViewModel()
 ) {
-
     val context = LocalContext.current
     val products by viewModel.products.collectAsState()
-
     val addProductState by viewModel.addProductState.collectAsState()
-    val updateProductState by viewModel.updateProductState.collectAsState()
-    val deleteProductState by viewModel.deleteProductState.collectAsState()
 
     var showAddBottomSheet by remember { mutableStateOf(false) }
     var productToEdit by remember { mutableStateOf<Product?>(null) }
@@ -87,16 +84,15 @@ fun StockScreen(
         onDismissEditBottomSheet = {
             productToEdit = null
         },
-        onConfirmUpdateProduct = { updatedProduct ->
-            viewModel.updateProduct(updatedProduct)
+        onConfirmUpdateProduct = { oldProduct, updatedProduct ->
+            viewModel.updateProduct(oldProduct, updatedProduct)
             productToEdit = null
         },
-        onConfirmDeleteProduct = { productTodDelete ->
-            viewModel.deleteProduct(productTodDelete)
+        onConfirmDeleteProduct = { productToDelete ->
+            viewModel.deleteProduct(productToDelete)
             productToEdit = null
         }
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,15 +108,27 @@ fun StockContent(
     onConfirmAddProduct: (Product) -> Unit,
     onEditClick: (Product) -> Unit,
     onDismissEditBottomSheet: () -> Unit,
-    onConfirmUpdateProduct: (Product) -> Unit,
+    onConfirmUpdateProduct: (Product, Product) -> Unit,
     onConfirmDeleteProduct: (Product) -> Unit
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredProducts = remember(searchQuery, products) {
+        if (searchQuery.isBlank()) {
+            products
+        } else {
+            products.filter { product ->
+                product.nome.contains(searchQuery, ignoreCase = true) ||
+                        product.vendedor.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
             FloatingActionButton(
-                onAddClick,
+                onClick = onAddClick,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -131,76 +139,85 @@ fun StockContent(
             }
         }
     ) { innerPadding ->
-
-        Column(
-            modifier = Modifier.padding(innerPadding)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
-
-            Text(
-                modifier  = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                text = "Lista de produtos",
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 88.dp)
             ) {
 
-
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        bottom = 88.dp
-                    )
-                ) {
-
-                    items(
-                        items = products,
-                        key = { product -> product.id }
-                    ) { product ->
-                        StockItemCard(
-                            item = product,
-                            onEditClick = onEditClick
+                stickyHeader {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.background // Evita transparência ao rolar os cards por baixo
+                    ) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            placeholder = { Text("Buscar por produto ou vendedor...") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Ícone de busca"
+                                )
+                            },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { searchQuery = "" }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Limpar busca"
+                                        )
+                                    }
+                                }
+                            },
+                            singleLine = true
                         )
                     }
-
                 }
 
-                if (isSavingProduct) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+                items(
+                    items = filteredProducts,
+                    key = { product -> product.id }
+                ) { product ->
+                    StockItemCard(
+                        item = product,
+                        onEditClick = onEditClick
                     )
                 }
-
             }
 
-            if (showAddBottomSheet) {
-                AddProductBottomSheet(
-                    onDismissRequest = onDismissBottomSheet,
-                    onConfirmRequest = onConfirmAddProduct
+            if (isSavingProduct) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
-
-            productToEdit?.let { product ->
-                EditProductBottomSheet(
-                    modifier = Modifier,
-                    productToEdit = product,
-                    onDismissRequest = onDismissEditBottomSheet,
-                    onConfirmUpdate = onConfirmUpdateProduct,
-                    onConfirmDelete = onConfirmDeleteProduct
-                )
-            }
-
         }
 
+        if (showAddBottomSheet) {
+            AddProductBottomSheet(
+                isLoading = isSavingProduct,
+                onDismissRequest = onDismissBottomSheet,
+                onConfirmRequest = onConfirmAddProduct
+            )
         }
 
-
-
+        productToEdit?.let { oldProduct ->
+            EditProductBottomSheet(
+                modifier = Modifier,
+                productToEdit = oldProduct,
+                onDismissRequest = onDismissEditBottomSheet,
+                onConfirmUpdate = { updatedProduct ->
+                    onConfirmUpdateProduct(oldProduct, updatedProduct)
+                },
+                onConfirmDelete = onConfirmDeleteProduct
+            )
+        }
+    }
 }

@@ -5,17 +5,20 @@ import androidx.lifecycle.viewModelScope
 import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.ui.features.signup.model.SignUpFormState
 import com.example.cantinadigital.ui.features.signup.model.ThirdYearClass
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SignUpScreenViewModel (
-    private val previewMode: Boolean = false
+@HiltViewModel
+class SignUpScreenViewModel @Inject constructor(
+    private val repository: AuthRepository,
 ) : ViewModel() {
 
-    private val repository = if (previewMode) null else AuthRepository()
+    var previewMode: Boolean = false
 
     private val _uiState = MutableStateFlow(SignUpFormState())
     val uiState: StateFlow<SignUpFormState> = _uiState.asStateFlow()
@@ -44,7 +47,7 @@ class SignUpScreenViewModel (
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            val result = repository?.signUp(
+            val result = repository.signUp(
                 fullName = state.name,
                 email = state.email,
                 password = state.password,

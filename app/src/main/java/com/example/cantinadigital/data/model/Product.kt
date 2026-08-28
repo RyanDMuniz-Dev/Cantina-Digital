@@ -22,6 +22,9 @@ data class Product(
     @get:PropertyName("vendedor") @set:PropertyName("vendedor")
     var vendedor: String = "Cantina",
 
+    @get:PropertyName("sala") @set:PropertyName("sala")
+    var sala: String = "",
+
     @get:PropertyName("taxa_cantina") @set:PropertyName("taxa_cantina")
     var cantinaTaxa: Double = 0.0,
 )

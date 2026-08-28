@@ -4,36 +4,65 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cantinadigital.data.model.FinancialTransaction
 import com.example.cantinadigital.data.model.Order
+import com.example.cantinadigital.data.model.Payout
+import com.example.cantinadigital.data.model.PayoutProduct
+import com.example.cantinadigital.data.repository.AuditLogRepository
+import com.example.cantinadigital.data.repository.AuthRepository
 import com.example.cantinadigital.data.repository.FinancialRepository
 import com.example.cantinadigital.data.repository.OrderRepository
+import com.example.cantinadigital.data.repository.PayoutRepository
 import com.example.cantinadigital.ui.features.insights.model.InsightsUiState
 import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class InsightsViewModel (
-    private val orderRepository: OrderRepository = OrderRepository(),
-    private val financialRepository: FinancialRepository = FinancialRepository()
+@HiltViewModel
+class InsightsViewModel @Inject constructor(
+    private val orderRepository: OrderRepository,
+    private val financialRepository: FinancialRepository,
+    private val payoutRepository: PayoutRepository,
+    private val authRepository: AuthRepository,
+    private val auditLogRepository: AuditLogRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(InsightsUiState())
-    val uiState: StateFlow<InsightsUiState> = _uiState.asStateFlow()
+    private val _uiState =
+        MutableStateFlow(InsightsUiState())
+
+    val uiState: StateFlow<InsightsUiState> =
+        _uiState.asStateFlow()
+
+    private val _employeeInfo = MutableStateFlow("")
+
+    val employeeInfo: StateFlow<String> = _employeeInfo.asStateFlow()
 
     init {
         loadData()
+        getEmployeeInfo()
     }
 
     private fun loadData() {
+
         viewModelScope.launch {
+
             combine(
                 orderRepository.getOrderFlow(),
-                financialRepository.getTransactions()
-            ) { orders, transactions ->
-                processInsights(orders, transactions)
+                financialRepository.getTransactions(),
+                payoutRepository.getPayouts()
+            ) { orders, transactions, payouts ->
+
+                processInsights(
+                    orders = orders,
+                    transactions = transactions,
+                    payouts = payouts
+                )
+
             }.collect { state ->
+
                 _uiState.value = state
             }
         }
@@ -41,15 +70,29 @@ class InsightsViewModel (
 
     private fun processInsights(
         orders: List<Order>,
-        transaction: List<FinancialTransaction>
-    ) : InsightsUiState {
+        transactions: List<FinancialTransaction>,
+        payouts: List<Payout>
+    ): InsightsUiState {
 
         var totalRevenue = 0.0
         var cantinaRoyalties = 0.0
+        var ownProductsRevenue = 0.0 // Receita de produtos próprios da cantina
 
-        val productSeller = mutableMapOf<String, MutableList<Pair<String, Int>>>()
+        val productSeller = mutableMapOf<String, MutableList<PayoutProduct>>()
         val grossSeller = mutableMapOf<String, Double>()
         val sellerTax = mutableMapOf<String, Double>()
+        val sellerClassMap = mutableMapOf<String, String>()
+
+        val paidKeys = payouts
+            .flatMap { payout ->
+                payout.produtos.map { product ->
+                    createPayoutKey(
+                        orderId = product.pedidoId,
+                        sellerName = payout.vendedor
+                    )
+                }
+            }
+            .toSet()
 
         for (order in orders) {
 
@@ -59,41 +102,98 @@ class InsightsViewModel (
 
                 val itemTotal = item.unitValue * item.amount
 
-                if (!item.vendedor.equals("Cantina", ignoreCase = true)) {
-                    val taxPercent = item.taxaCantina / 100.0
-                    val taxValue = itemTotal * taxPercent
-
-                    cantinaRoyalties += taxValue
-
-                    grossSeller[item.vendedor] = (grossSeller[item.vendedor] ?: 0.0) + itemTotal
-                    sellerTax[item.vendedor] = (sellerTax[item.vendedor] ?: 0.0) + taxValue
-
-                    val list = productSeller.getOrPut(item.vendedor) { mutableListOf() }
-                    list.add(Pair(item.name,item.amount))
+                /*
+                 * Produtos da própria Cantina: 100% da receita entra para o caixa da cantina.
+                 */
+                if (item.vendedor.equals("Cantina", ignoreCase = true)) {
+                    ownProductsRevenue += itemTotal
+                    continue
                 }
 
+                val seller = item.vendedor.trim()
+
+                if (item.sala.isNotBlank()) {
+                    sellerClassMap[seller] = item.sala
+                }
+
+                val taxPercent = item.taxaCantina / 100.0
+                val taxValue = itemTotal * taxPercent
+
+                /*
+                 * Receita total de taxas (royalties) da cantina.
+                 */
+                cantinaRoyalties += taxValue
+
+                val payoutKey = createPayoutKey(
+                    orderId = order.id,
+                    sellerName = seller
+                )
+
+                /*
+                 * Se já foi repassado, pula a inclusão nos repasses pendentes.
+                 */
+                if (payoutKey in paidKeys) {
+                    continue
+                }
+
+                grossSeller[seller] = (grossSeller[seller] ?: 0.0) + itemTotal
+                sellerTax[seller] = (sellerTax[seller] ?: 0.0) + taxValue
+
+                val payoutProduct = PayoutProduct(
+                    pedidoId = order.id,
+                    produtoId = item.productId,
+                    nome = item.name,
+                    quantidade = item.amount,
+                    valorUnitario = item.unitValue,
+                    valorTotal = itemTotal,
+                    taxaCantina = item.taxaCantina
+                )
+
+                productSeller
+                    .getOrPut(seller) { mutableListOf() }
+                    .add(payoutProduct)
             }
+        }
 
-        } // for orders
+        /*
+         * Movimentações manuais do caixa.
+         */
+        val totalExits = transactions
+            .filter { it.tipo.equals("SAIDA", ignoreCase = true) }
+            .sumOf { it.valor }
 
-        val totalExits = transaction.filter { it.tipo.equals("SAIDA", ignoreCase = true) }.sumOf { it.valor }
-        val totalManualEntry = transaction.filter { it.tipo.equals("ENTRADA", ignoreCase = true) }.sumOf { it.valor }
+        val totalManualEntry = transactions
+            .filter { it.tipo.equals("ENTRADA", ignoreCase = true) }
+            .sumOf { it.valor }
 
-        val balance = (totalRevenue + totalManualEntry) - totalExits
+        /*
+         * Saldo REAL do Caixa da Cantina:
+         * Receita das vendas da própria Cantina + Taxas cobradas dos alunos + Suprimentos manuais
+         * DEDUZINDO: Apenas Sangrias manuais (Retiradas).
+         */
+
+        val balance = (ownProductsRevenue + cantinaRoyalties + totalManualEntry) - totalExits
 
         val repassesList = grossSeller.map { (seller, gross) ->
             val tax = sellerTax[seller] ?: 0.0
-            val groupedProducts = productSeller[seller]
-                ?.groupBy { it.first }
-                ?.map { (name, list) -> Pair(name, list.sumOf { it.second }) }
-                ?: emptyList()
+            val products = productSeller[seller] ?: emptyList()
+
+            val groupedProducts = products
+                .groupBy { it.nome }
+                .map { (name, list) ->
+                    Pair(name, list.sumOf { it.quantidade })
+                }
 
             SellerPayoutSummary(
                 sellerName = seller,
+                sellerClass = sellerClassMap[seller] ?: "",
+                statusLabel = "Repasse pendente",
+                isPaid = false,
                 itemsSold = groupedProducts,
                 grossTotal = gross,
                 cantinaTax = tax,
-                liquidValueRepass = gross - tax
+                liquidValueRepass = gross - tax,
+                payoutProducts = products
             )
         }
 
@@ -103,21 +203,100 @@ class InsightsViewModel (
             totalExits = totalExits,
             totalBalance = balance,
             sellersRoyalties = repassesList,
+            confirmedPayouts = payouts,
             isLoading = false
         )
+    }
+
+    fun confirmPayout(summary: SellerPayoutSummary) {
+        viewModelScope.launch {
+            val userResult = authRepository.getDadosUsuarioLogado()
+            val userData = userResult.getOrNull()
+
+            val employeeName = userData?.get("nome") as? String ?: "Atendente"
+            val employeeId = userData?.get("uid") as? String ?: ""
+
+            val payout = Payout(
+                vendedor = summary.sellerName,
+                valorBruto = summary.grossTotal,
+                taxaCantina = summary.cantinaTax,
+                valorRepassado = summary.liquidValueRepass,
+                produtos = summary.payoutProducts,
+                funcionarioId = employeeId,
+                funcionarioNome = employeeName,
+                dataHora = com.google.firebase.Timestamp.now() // <-- Garante que a data/hora seja gravada!
+            )
+
+            payoutRepository.createPayout(payout)
+
+            auditLogRepository.logAction(
+                type = "REPASSE",
+                action = "CONFIRMAR",
+                description = "Confirmou repasse de R$ %.2f para %s".format(summary.liquidValueRepass, summary.sellerName),
+                username = employeeName
+            )
+        }
+    }
+
+    fun getEmployeeInfo() {
+
+        viewModelScope.launch {
+
+            val userResult = authRepository.getDadosUsuarioLogado()
+
+            val userData = userResult.getOrNull()
+
+            val employeeName = userData?.get("nome") as? String
+            val employeeClass = userData?.get("turma") as? String
+
+            _employeeInfo.value = "$employeeName $employeeClass".trim()
+
+        }
 
     }
 
-    fun addFinancialTransaction(type: String, value: Double, reason: String) {
+    fun addFinancialTransaction(
+        type: String,
+        value: Double,
+        reason: String
+    ) {
         viewModelScope.launch {
+            // 1. Busca os dados do usuário conectado (Nome e Turma/Sala)
+            val userResult = authRepository.getDadosUsuarioLogado()
+            val userData = userResult.getOrNull()
+
+            val userName = userData?.get("nome") as? String ?: "Atendente"
+            val userClass = userData?.get("turma") as? String ?: ""
+
+            // 2. Monta e envia a transação financeira
             val transaction = FinancialTransaction(
                 tipo = type,
                 valor = value,
                 motivo = reason,
-                funcionarioNome = "Atendente"
+                funcionarioNome = userName
             )
+
             financialRepository.addTransaction(transaction)
+
+            // 3. Registra o Log de Auditoria para o Caixa
+            val actionName = if (type == "ENTRADA") "SUPRIMENTO" else "RETIRADA"
+            val actionLabel = if (type == "ENTRADA") "Entrada" else "Saída"
+
+            auditLogRepository.logAction(
+                type = "CAIXA",
+                action = actionName,
+                description = "Lançamento de $actionLabel manual: R$ %.2f - Motivo: %s".format(value, reason),
+                username = userName,
+                userClass = userClass
+            )
         }
     }
 
+    private fun createPayoutKey(
+        orderId: String,
+        sellerName: String
+    ): String {
+
+        return "${orderId}|${sellerName.trim().lowercase()}"
+    }
 }

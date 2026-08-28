@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.cantinadigital.ui.components.cards.OrderItemCard
 import com.example.cantinadigital.ui.components.dialogs.ConfirmPaymentDialog
 import com.example.cantinadigital.ui.components.dialogs.CreateOrderDialog
@@ -40,7 +40,7 @@ import java.util.TimeZone
 
 @Composable
 fun OrdersScreen(
-    viewModel: CreateOrderViewModel = viewModel()
+    viewModel: CreateOrderViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current
@@ -165,6 +165,7 @@ fun OrdersScreen(
             if (showConfirmPaymentDialog) {
                 ConfirmPaymentDialog(
                     cartItems = cartItems,
+                    isLoading = uiState is CreateOrderUiState.Loading,
                     onDismissRequest = {
                         showConfirmPaymentDialog = false
                         showCreateOrderDialog = true

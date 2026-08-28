@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -26,13 +25,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.cantinadigital.R
 import com.example.cantinadigital.data.model.Product
+import com.example.cantinadigital.ui.components.buttons.PrimaryLoadingButton
 import com.example.cantinadigital.ui.components.fields.SimpleFormTextField
+import com.example.cantinadigital.ui.components.selectors.SelectorBox
+import com.example.cantinadigital.ui.features.signup.model.ThirdYearClass
 import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddProductBottomSheet(
     modifier: Modifier = Modifier,
+    isLoading: Boolean,
     onDismissRequest: () -> Unit,
     onConfirmRequest: (Product) -> Unit
 ) {
@@ -41,6 +44,11 @@ fun AddProductBottomSheet(
     var nome by remember { mutableStateOf("") }
     var valor by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("") }
+
+    // 1. Declare os estados no topo do Composable:
+    // Estado do Enum para o SelectorBox exibir a seleção
+    var selectedClassEnum by remember { mutableStateOf(ThirdYearClass.W) }
+    var sala by remember { mutableStateOf(selectedClassEnum.name) }
 
     var vendedor by remember { mutableStateOf("") }
     var isProductCantina by remember { mutableStateOf(true) }
@@ -154,23 +162,44 @@ fun AddProductBottomSheet(
             }
 
             if (!isProductCantina) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SimpleFormTextField(
-                        modifier = Modifier.weight(0.6f),
-                        value = vendedor,
-                        label = R.string.vendedor,
-                        singleLine = true,
-                        onValueChanged = { vendedor = it },
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            imeAction = ImeAction.Next
+                Column(
+                    verticalArrangement = Arrangement.Center
+                )
+                {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.Top // 1. Alinha todos os elementos pelo topo
+                    ) {
+                        SimpleFormTextField(
+                            modifier = Modifier.weight(0.7f),
+                            value = vendedor,
+                            label = R.string.vendedor,
+                            singleLine = true,
+                            onValueChanged = { vendedor = it },
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Next
+                            )
                         )
-                    )
+
+                        SelectorBox(
+                            modifier = Modifier
+                                .weight(0.3f)
+                                .padding(top = 13.dp), // 2. Desce o caixa do Selector em 8dp para emparelhar com a borda do TextField
+                            classList = listOf("W", "X", "Y"),
+                            selectedClass = selectedClassEnum,
+                            onClassSelected = { selectedString ->
+                                sala = selectedString
+                                selectedClassEnum = runCatching {
+                                    ThirdYearClass.valueOf(selectedString)
+                                }.getOrDefault(ThirdYearClass.W)
+                            }
+                        )
+                    }
 
                     SimpleFormTextField(
-                        modifier = Modifier.weight(0.4f),
+                        modifier = Modifier.fillMaxWidth().padding(),
                         value = cantinaTax,
                         label = R.string.tax,
                         singleLine = true,
@@ -179,18 +208,22 @@ fun AddProductBottomSheet(
                             imeAction = ImeAction.Done
                         )
                     )
+
                 }
             }
 
             // Botão de Salvar
-            Button(
+            PrimaryLoadingButton(
                 modifier = Modifier.fillMaxWidth(),
+                text = "Cadastrar Produto",
+                isLoading = isLoading,
                 enabled = isFormValid,
                 onClick = {
                     val sanitizedValue = valor.replace(",", ".").toDoubleOrNull() ?: 0.0
                     val sanitizedAmount = quantidade.trim().toIntOrNull() ?: 0
                     val sanitizedTax = if (isProductCantina) 0.0 else (cantinaTax.replace(",", ".").trim().toDoubleOrNull() ?: 0.0)
                     val sanitizedSeller = if (isProductCantina) "Cantina" else vendedor.trim()
+                    val sanitizedClass = if (isProductCantina) "WXY" else sala.trim().uppercase()
 
                     val newProduct = Product(
                         emoji = emoji.ifBlank { "📦" },
@@ -198,14 +231,12 @@ fun AddProductBottomSheet(
                         valor = sanitizedValue,
                         quantidade = sanitizedAmount,
                         vendedor = sanitizedSeller,
+                        sala = sanitizedClass,
                         cantinaTaxa = sanitizedTax
                     )
                     onConfirmRequest(newProduct)
                 },
-            ) {
-                Text("Cadastrar Produto")
-            }
-
+            )
         }
 
     }
@@ -217,7 +248,8 @@ private fun AddProductBottomSheetPreview() {
     CantinaDigitalTheme {
         AddProductBottomSheet(
             onDismissRequest = {},
-            onConfirmRequest = {}
+            onConfirmRequest = {},
+            isLoading = false
         )
     }
 }

@@ -9,11 +9,11 @@
     <string name="success_login">Login realizado com sucesso!</string>
     <string name="don_t_have_an_account_sign_up">Não tem uma conta? Cadastre-se</string>
     <string name="back">voltar</string>
-    <string name="notifications">Notifications</string>
-    <string name="profile">profile</string>
+    <string name="notifications">Notificações</string>
+    <string name="profile">Perfil</string>
     <string name="emoji">Emoji</string>
-    <string name="price">Price (R$)</string>
-    <string name="amount">Amount</string>
+    <string name="price">Preço (R$)</string>
+    <string name="amount">Quantidade</string>
     <string name="vendedor">Vendedor</string>
     <string name="tax">Taxa (%)</string>
 </resources>

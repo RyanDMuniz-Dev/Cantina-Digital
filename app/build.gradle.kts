@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization) // Necessário para o Supabase
     alias(libs.plugins.hilt)                 // Hilt
     alias(libs.plugins.ksp)
-    alias(libs.plugins.kotlin.android)
+//  alias(libs.plugins.kotlin.android)
 
     id("com.google.gms.google-services") // Necessário para o Firebase
 }
@@ -16,16 +16,12 @@ android {
     defaultConfig {
         applicationId = "com.example.cantinadigital"
         minSdk = 24
-        targetSdk = 35 // isso está dando uma cobrinha amarela
+        targetSdk = 35
+        // isso está dando uma cobrinha amarela
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        val localProperties = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir, providers)
-
-        buildConfigField("String", "SUPABASE_URL", "\"${localProperties["SUPABASE_URL"]}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties["SUPABASE_ANON_KEY"]}\"")
+//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -39,15 +35,18 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
         buildConfig = true
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    buildToolsVersion = "36.0.0"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 }
 
@@ -67,37 +66,35 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     // Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+    implementation(platform(libs.firebase.bom))
 
     // Bibliotecas do Firebase
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     implementation(libs.androidx.runtime)
     implementation(libs.firebase.database)
 
     // Corrotinas para Firebase (.await())
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.0")
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Ícones estendidos
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
 
     implementation(libs.ktor.client.android)
 
     // Hilt (Injeção de Dependência)
     implementation(libs.hilt.android)
-    implementation(libs.core.ktx)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
-    // Testes
+//    Testes
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+//    androidTestImplementation(libs.androidx.junit)
+//    androidTestImplementation(libs.androidx.espresso.core)
+//    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
-    // Aplica a BOM do Compose também nos testes para resolver a versão do ui-test-junit4
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-
+//    debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

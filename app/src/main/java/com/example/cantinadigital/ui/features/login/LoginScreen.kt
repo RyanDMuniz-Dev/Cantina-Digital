@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.cantinadigital.R
 import com.example.cantinadigital.ui.components.fields.FormTextField
 import com.example.cantinadigital.ui.components.fields.PasswordTextField
@@ -43,7 +44,7 @@ import com.example.cantinadigital.ui.components.fields.PasswordTextField
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    viewModel: LoginScreenViewModel,
+    viewModel: LoginScreenViewModel = hiltViewModel(),
     onLoginSuccess: () -> Unit = {},
     onNavigateToSignUp: () -> Unit = {}
 ) {
@@ -53,7 +54,7 @@ fun LoginScreen(
 
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess){
-            Toast.makeText(context, context.getString(R.string.success_login), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show()
             onLoginSuccess()
         }
     }

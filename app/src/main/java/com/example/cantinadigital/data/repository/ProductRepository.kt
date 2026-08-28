@@ -5,11 +5,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import javax.inject.Inject
 
-class ProductRepository(
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val path: String = "produtos"
+class ProductRepository @Inject constructor(
+    private val firestore: FirebaseFirestore,
 ) {
+
+    private val path: String = "produtos"
 
     fun getProductFlow(): Flow<List<Product>> = callbackFlow {
         val listener = firestore.collection(path)

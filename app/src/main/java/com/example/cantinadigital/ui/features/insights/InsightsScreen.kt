@@ -21,32 +21,42 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.cantinadigital.ui.components.cards.ConfirmedPayoutCard
 import com.example.cantinadigital.ui.components.cards.MetricCard
 import com.example.cantinadigital.ui.components.cards.SellerPayoutCard
 import com.example.cantinadigital.ui.components.dialogs.AddTransactionDialog
-import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
+import com.example.cantinadigital.ui.components.dialogs.ConfirmPayoutDialog
+import com.example.cantinadigital.ui.features.insights.model.SellerPayoutSummary
 
 @Composable
 fun InsightsScreen(
     modifier: Modifier = Modifier,
-    viewModel: InsightsViewModel = viewModel()
+    viewModel: InsightsViewModel = hiltViewModel(),
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
     var showAddTransactionDialog by remember { mutableStateOf(false) }
+    var selectPayoutForConfimation by remember { mutableStateOf<SellerPayoutSummary?>(null) }
+
+    val employeeInfo by viewModel.employeeInfo.collectAsState()
+
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("A confirmar", "Repassados")
 
     Scaffold(
         modifier = modifier,
@@ -56,14 +66,13 @@ fun InsightsScreen(
                 icon = { Icon(Icons.Default.Add, contentDescription = "Movimentar Caixa") },
                 text = { Text("Lançar Caixa") }
             )
-        }
-    ) {innerPadding ->
+        },
+    ) { innerPadding ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
         ) {
 
             Text(
@@ -75,7 +84,7 @@ fun InsightsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (uiState.isLoading) {
-                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             } else {
@@ -87,7 +96,6 @@ fun InsightsScreen(
                     )
                 ) {
 
-                    // Main data
                     item {
                         Row(
                             modifier = Modifier.fillMaxSize(),
@@ -137,32 +145,73 @@ fun InsightsScreen(
                         }
                     }
 
+                    // 1. Componente de Abas exatamente na posição indicada!
                     item {
-                        Text(
-                            text = "Repasses por Vendedor / Aluno",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                        SecondaryTabRow(
+                            selectedTabIndex = selectedTabIndex,
+                            modifier = Modifier.fillMaxWidth(),
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.primary
+                        ) {
+                            tabs.forEachIndexed { index, title ->
+                                Tab(
+                                    selected = selectedTabIndex == index,
+                                    onClick = { selectedTabIndex = index },
+                                    text = {
+                                        Text(
+                                            text = title,
+                                            fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    }
+                                )
+                            }
+                        }
                     }
 
-                    if (uiState.sellersRoyalties.isEmpty()) {
-                        item {
-                            Text(
-                                text = "Nenhum produto de terceiro/aluno foi vendido ainda!",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                    // 2. Renderização de acordo com a aba selecionada
+                    if (selectedTabIndex == 0) {
+                        // ABA: A CONFIRMAR (PENDENTES)
+                        if (uiState.sellersRoyalties.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "Nenhum repasse pendente momento!",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(vertical = 16.dp)
+                                )
+                            }
+                        } else {
+                            items(uiState.sellersRoyalties) { summary ->
+                                SellerPayoutCard(
+                                    summary = summary,
+                                    onConfirmPayoutSummary = {
+                                        selectPayoutForConfimation = summary
+                                    }
+                                )
+                            }
                         }
                     } else {
-                        items(uiState.sellersRoyalties) { summary ->
-                            SellerPayoutCard(summary = summary)
+                        // ABA: REPASSADOS (HISTÓRICO)
+                        if (uiState.confirmedPayouts.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "Nenhum repasse foi realizado ainda.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(vertical = 16.dp)
+                                )
+                            }
+                        } else {
+                            items(uiState.confirmedPayouts) { payout ->
+                                ConfirmedPayoutCard(payout = payout)
+                            }
                         }
                     }
-                }
+                } // end lazy column
             }
         }
 
+        // Diálogo para lançamento de movimentação de caixa
         if (showAddTransactionDialog) {
             AddTransactionDialog(
                 onDismissRequest = { showAddTransactionDialog = false },
@@ -173,14 +222,18 @@ fun InsightsScreen(
             )
         }
 
-    }
-
-}
-
-@Preview
-@Composable
-private fun InsightsScreenPreview() {
-    CantinaDigitalTheme {
-
+        // Diálogo de confirmação de repasse
+        selectPayoutForConfimation?.let { summary ->
+            ConfirmPayoutDialog(
+                summary = summary,
+                isProcessing = uiState.isProcessingPayout,
+                funcionarioNome = employeeInfo,
+                onDismissRequest = { selectPayoutForConfimation = null },
+                onConfirm = {
+                    viewModel.confirmPayout(summary)
+                    selectPayoutForConfimation = null
+                }
+            )
+        }
     }
 }

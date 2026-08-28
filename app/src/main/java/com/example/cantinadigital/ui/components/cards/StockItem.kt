@@ -25,11 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cantinadigital.data.model.Product
-import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -38,7 +37,6 @@ fun StockItemCard(
     item: Product,
     onEditClick: (Product) -> Unit
 ) {
-    
     val amountBgColor = if (item.quantidade == 0) {
         MaterialTheme.colorScheme.errorContainer
     } else {
@@ -70,6 +68,7 @@ fun StockItemCard(
         ) {
             // Lado Esquerdo: Emoji + Informações Principais
             Row(
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -88,17 +87,30 @@ fun StockItemCard(
                 }
 
                 // Nome e Vendedor
-                Column {
+                Column(
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
                     Text(
                         text = item.nome,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = "Vendedor: ${item.vendedor}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "Sala: 3º${item.sala}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -139,24 +151,6 @@ fun StockItemCard(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
         }
-    }
-}
-
-@Preview
-@Composable
-private fun StockItemPreview() {
-    CantinaDigitalTheme {
-        StockItemCard(
-            item = Product(
-                nome = "Pirulito",
-                emoji = "🍭",
-                vendedor = "Cantina",
-                quantidade = 20,
-                valor = 2.30
-            ),
-            onEditClick = {}
-        )
     }
 }

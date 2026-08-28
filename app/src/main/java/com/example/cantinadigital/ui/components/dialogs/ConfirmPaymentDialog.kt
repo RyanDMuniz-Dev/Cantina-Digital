@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -31,16 +30,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.cantinadigital.data.model.OrderItem
-import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
+import com.example.cantinadigital.ui.components.buttons.PrimaryLoadingButton
 
 @Composable
 fun ConfirmPaymentDialog(
     cartItems: List<OrderItem>,
+    isLoading: Boolean,
     onDismissRequest: () -> Unit,
     onConfirmPayment: (paymentType: String, receivedValue: Double, change: Double) -> Unit
 ) {
@@ -179,7 +178,9 @@ fun ConfirmPaymentDialog(
                         Text("Voltar")
                     }
 
-                    Button(
+                    PrimaryLoadingButton(
+                        text = "Confirmar",
+                        isLoading = isLoading,
                         onClick = {
                             onConfirmPayment(
                                 paymentType,
@@ -189,9 +190,7 @@ fun ConfirmPaymentDialog(
                         },
                         modifier = Modifier.weight(1f),
                         enabled = isPaymentValid
-                    ) {
-                        Text("Confirmar")
-                    }
+                    )
                 }
 
             }
@@ -200,22 +199,23 @@ fun ConfirmPaymentDialog(
 
 }
 
-@Preview (showBackground = true, showSystemUi = true)
-@Composable
-private fun ConfirmPaymentDialogPreview() {
-
-    val sampleItems = listOf(
-        OrderItem("123", "Azedinho", 1, 1.5, "Cantina", 0.0),
-        OrderItem("456", "Coca-Cola Zero", 2, 3.5, "Cantina", 0.0)
-    )
-
-    CantinaDigitalTheme {
-        ConfirmPaymentDialog(
-            cartItems = sampleItems,
-            onDismissRequest = {},
-            onConfirmPayment = { paymentType, receivedValue, change ->
-
-            }
-        )
-    }
-}
+//@Preview (showBackground = true, showSystemUi = true)
+//@Composable
+//private fun ConfirmPaymentDialogPreview() {
+//
+//    val sampleItems = listOf(
+//        OrderItem("123", "Azedinho", 1, 1.5, "Cantina", 0.0),
+//        OrderItem("456", "Coca-Cola Zero", 2, 3.5, "Cantina", 0.0)
+//    )
+//
+//    CantinaDigitalTheme {
+//        ConfirmPaymentDialog(
+//            cartItems = sampleItems,
+//            onDismissRequest = {},
+//            onConfirmPayment = { paymentType, receivedValue, change ->
+//
+//            },
+//            isLoading = false
+//        )
+//    }
+//}

@@ -15,14 +15,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -37,7 +35,7 @@ fun AddTransactionDialog(
     onConfirm: (type: String, value: Double, reason: String) -> Unit
 ) {
 
-    var type by remember { mutableStateOf("SAÍDA") }
+    var type by remember { mutableStateOf("SAIDA") }
     var valueText by remember { mutableStateOf("") }
     var reasonText by remember { mutableStateOf("") }
 
@@ -46,7 +44,7 @@ fun AddTransactionDialog(
 
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
-            modifier = Modifier.fillMaxWidth(0.92f),
+            modifier = modifier.fillMaxWidth(0.92f),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
@@ -63,24 +61,21 @@ fun AddTransactionDialog(
                     fontWeight = FontWeight.Bold
                 )
 
-                // type selector
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    TextRadioButton(
-                        selected = type == "SAIDA",
-                        onClick = { type = "SAIDA" },
-                        text = "Saída (Gasto)"
-                    )
-                    TextRadioButton(
-                        selected = type == "ENTRADA",
-                        onClick = { type = "ENTRADA" },
-                        text = "Entrada Extra"
-                    )
-                }
+                // Seleção do tipo de movimentação
 
-                // value field
+                TextRadioButton(
+                    selected = type == "SAIDA",
+                    onClick = { type = "SAIDA" },
+                    text = "Retirada / Saída"
+                )
+                TextRadioButton(
+                    selected = type == "ENTRADA",
+                    onClick = { type = "ENTRADA" },
+                    text = "Suprimento / Entrada"
+                )
+
+
+                // Campo de valor
                 OutlinedTextField(
                     value = valueText,
                     onValueChange = { valueText = it },
@@ -90,12 +85,12 @@ fun AddTransactionDialog(
                     singleLine = true
                 )
 
-                // reason field
+                // Campo de descrição
                 OutlinedTextField(
                     value = reasonText,
                     onValueChange = { reasonText = it },
                     label = { Text("Motivo / Descrição") },
-                    placeholder = { Text("Ex: Compra de gelo, Troco inicial...") },
+                    placeholder = { Text("Ex: Compra de gelo, Reforço de troco...") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -125,5 +120,4 @@ fun AddTransactionDialog(
             }
         }
     }
-
 }
