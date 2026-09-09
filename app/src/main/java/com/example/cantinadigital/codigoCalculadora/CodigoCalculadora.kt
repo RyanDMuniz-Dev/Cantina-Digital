@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -111,7 +110,7 @@ fun Calculadora(modifier: Modifier = Modifier){
             Button(
                 onClick = {
                     if(equation != null){
-                        result = calculateExpression(equation, operador)
+                        result = calculandoExpressao(equation, operador)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -415,23 +414,40 @@ fun Calculadora(modifier: Modifier = Modifier){
                     fontSize = 20.sp,
                 )
             }
-            calculateExpression(equation, operador)
+            calculandoExpressao(equation, operador)
         }
     }
 }
 
-private fun calculateExpression(expression: String, operador: String): String{
-    if(expression == null)
+private fun calculandoExpressao(expression: String, operador: String): String{
+    if(expression.isBlank()) {
         return "0"
+    }
+    val numeros = expression.split("+", "-", "x", "÷").filter { it.isNotBlank() }
 
-    val (num1, num2) = expression.split(operador, limit = 2).takeIf { it.size == 2 } ?: return "Error"
+    var result = numeros[0].toDoubleOrNull() ?: return "Error"
 
-    val number1 = num1.toDoubleOrNull() ?: return "Error" //antes era val e double no metodo
-    val number2 = num2.toDoubleOrNull() ?: return "Error" //antes era val e double no metodo
+    for(numeroTexto in numeros){
+        val numero = numeroTexto.toDoubleOrNull() ?: return "Error"
 
-    /*if(num2.endsWith("%")){
-        number2 /= 100
-    }*/
+        result = when(operador){
+            "+" -> result + numero
+            "-" -> result - numero
+            "x" -> result * numero
+            "÷" -> if(numero != 0.0){
+                    result/numero
+                } else{
+                    return "Error"
+                }
+            else -> return "Error"
+        }
+    }
+    return result.toString()
+
+    /*val (num1, num2) = expression.split(operador, limit = 2).takeIf { it.size == 2 } ?: return "Error"
+
+    val number1 = num1.toDoubleOrNull() ?: return "Error"
+    val number2 = num2.toDoubleOrNull() ?: return "Error"
 
     val result = when(operador){
         "+" -> number1 + number2
@@ -441,6 +457,7 @@ private fun calculateExpression(expression: String, operador: String): String{
         else -> return "Error"
     }
     return result.toString()
+    */
 }
 
 @Preview(showBackground = true)
