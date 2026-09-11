@@ -314,7 +314,7 @@ private fun ProductOrderItem(
                 Text(
                     text = "R$ %.2f".format(product.valor),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.SemiBold
                 )
 
