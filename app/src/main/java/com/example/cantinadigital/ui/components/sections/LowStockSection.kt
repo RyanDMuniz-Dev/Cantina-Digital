@@ -32,6 +32,12 @@ fun LowStockSection(
             title = "⚠️ Estoque crítico"
         )
 
+        Text(
+            text = "Produtos que precisam de reposição.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
@@ -84,27 +90,43 @@ private fun LowStockRow(
             style = MaterialTheme.typography.titleLarge
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(
+            modifier = Modifier.width(12.dp)
+        )
 
         Column(
             modifier = Modifier.weight(1f)
         ) {
+
             Text(
                 text = product.nome,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold
             )
 
             Text(
-                text = "Estoque baixo",
+                text = "Estoque crítico",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
         }
 
-        Text(
-            text = "${product.quantidade} un.",
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.error
-        )
+        Column(
+            horizontalAlignment = Alignment.End
+        ) {
+
+            Text(
+                text = product.quantidade.toString(),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.error
+            )
+
+            Text(
+                text = "un.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+        }
     }
 }

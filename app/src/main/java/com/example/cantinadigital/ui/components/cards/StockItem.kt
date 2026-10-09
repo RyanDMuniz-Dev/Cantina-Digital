@@ -2,13 +2,15 @@ package com.example.cantinadigital.ui.components.cards
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -37,120 +40,203 @@ fun StockItemCard(
     item: Product,
     onEditClick: (Product) -> Unit
 ) {
-    val amountBgColor = if (item.quantidade == 0) {
-        MaterialTheme.colorScheme.errorContainer
-    } else {
-        MaterialTheme.colorScheme.primaryContainer
-    }
-
-    val amountTextColor = if (item.quantidade == 0) {
-        MaterialTheme.colorScheme.onErrorContainer
-    } else {
-        MaterialTheme.colorScheme.onPrimaryContainer
+    val stockStatus = when {
+        item.quantidade <= 0 -> StockStatus.OUT_OF_STOCK
+        item.quantidade <= 5 -> StockStatus.LOW
+        else -> StockStatus.AVAILABLE
     }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            .padding(
+                horizontal = 16.dp,
+                vertical = 5.dp
+            ),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
         )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            // Lado Esquerdo: Emoji + Informações Principais
+
             Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Ícone/Emoji com fundo circular
+
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface),
+                        .size(52.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            MaterialTheme.colorScheme.primaryContainer
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = item.emoji,
-                        fontSize = 24.sp
+                        fontSize = 26.sp
                     )
                 }
 
-                // Nome e Vendedor
+                Spacer(
+                    modifier = Modifier.width(12.dp)
+                )
+
                 Column(
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = item.nome,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = "Vendedor: ${item.vendedor}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+
+                    Spacer(
+                        modifier = Modifier.height(3.dp)
                     )
+
                     Text(
-                        text = "Sala: 3º${item.sala}",
+                        text = "${item.vendedor} • ${item.sala}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-            }
 
-            // Lado Direito: Valor + Badge de Quantidade
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = String.format("R$ %.2f", item.valor),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                // Chip / Badge mostrando a quantidade disponível
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = amountBgColor
+                Column(
+                    horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "${item.quantidade} em estoque",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        text = String.format(
+                            "R$ %.2f",
+                            item.valor
+                        ),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text(
+                        text = "unidade",
                         style = MaterialTheme.typography.labelSmall,
-                        color = amountTextColor,
-                        fontWeight = FontWeight.Medium
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            IconButton(
-                onClick = { onEditClick(item) }
+            Spacer(
+                modifier = Modifier.height(14.dp)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "edit: ${item.nome}",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+
+                StockStatusBadge(
+                    status = stockStatus,
+                    quantity = item.quantidade
                 )
+
+                Spacer(
+                    modifier = Modifier.weight(1f)
+                )
+
+                IconButton(
+                    onClick = {
+                        onEditClick(item)
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Editar ${item.nome}",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
+        }
+    }
+}
+
+private enum class StockStatus {
+    AVAILABLE,
+    LOW,
+    OUT_OF_STOCK
+}
+
+@Composable
+private fun StockStatusBadge(
+    status: StockStatus,
+    quantity: Int
+) {
+    val containerColor: Color
+    val contentColor: Color
+    val text: String
+
+    when (status) {
+
+        StockStatus.AVAILABLE -> {
+            containerColor =
+                MaterialTheme.colorScheme.primaryContainer
+            contentColor =
+                MaterialTheme.colorScheme.onPrimaryContainer
+            text = "$quantity unidades disponíveis"
+        }
+
+        StockStatus.LOW -> {
+            containerColor =
+                MaterialTheme.colorScheme.tertiaryContainer
+            contentColor =
+                MaterialTheme.colorScheme.onTertiaryContainer
+            text = "Estoque baixo • $quantity un."
+        }
+
+        StockStatus.OUT_OF_STOCK -> {
+            containerColor =
+                MaterialTheme.colorScheme.errorContainer
+            contentColor =
+                MaterialTheme.colorScheme.onErrorContainer
+            text = "Estoque esgotado"
+        }
+    }
+
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = containerColor
+    ) {
+        Row(
+            modifier = Modifier.padding(
+                horizontal = 10.dp,
+                vertical = 6.dp
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(7.dp)
+                    .clip(CircleShape)
+                    .background(contentColor)
+            )
+
+            Spacer(
+                modifier = Modifier.width(7.dp)
+            )
+
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = contentColor
+            )
         }
     }
 }

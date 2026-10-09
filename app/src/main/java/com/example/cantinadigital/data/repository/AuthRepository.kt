@@ -57,12 +57,24 @@ class AuthRepository @Inject constructor(
      * Puxa os dados do perfil logado (nome, turma)
      */
     suspend fun getDadosUsuarioLogado(): Result<Map<String, Any>?> {
-        val uid = auth.currentUser?.uid ?: return Result.failure(Exception("Nenhum usuário logado."))
+        val uid = auth.currentUser?.uid
+            ?: return Result.failure(Exception("Nenhum usuário logado."))
 
         return try {
-            val snapshot = db.collection("users").document(uid).get().await()
+            println("DEBUG UID: $uid")
+
+            val snapshot = db
+                .collection("users")
+                .document(uid)
+                .get()
+                .await()
+
+            println("DEBUG USER EXISTS: ${snapshot.exists()}")
+            println("DEBUG USER DATA: ${snapshot.data}")
+
             Result.success(snapshot.data)
         } catch (e: Exception) {
+            println("DEBUG USER ERROR: ${e.message}")
             Result.failure(e)
         }
     }

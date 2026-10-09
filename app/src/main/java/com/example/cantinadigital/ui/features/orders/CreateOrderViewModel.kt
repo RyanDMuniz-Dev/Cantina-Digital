@@ -137,10 +137,33 @@ class CreateOrderViewModel @Inject constructor(
             _uiState.value = CreateOrderUiState.Loading
 
             val userResult = authRepository.getDadosUsuarioLogado()
+
+            if (userResult.isFailure) {
+                _uiState.value = CreateOrderUiState.Error(
+                    "Não foi possível carregar os dados do usuário."
+                )
+                return@launch
+            }
+
             val userData = userResult.getOrNull()
 
-            val employeeName = userData?.get("nome") as? String ?: "Atendente"
-            val employeeClass = userData?.get("turma") as? String ?: ""
+            if (userData == null) {
+                _uiState.value = CreateOrderUiState.Error(
+                    "Perfil do usuário não encontrado."
+                )
+                return@launch
+            }
+
+            val employeeName = userData["nome"] as? String
+
+            val employeeClass = userData["turma"] as? String
+
+            if (employeeName.isNullOrBlank() || employeeClass.isNullOrBlank()) {
+                _uiState.value = CreateOrderUiState.Error(
+                    "Nome ou turma do usuário não encontrados."
+                )
+                return@launch
+            }
 
             val newOrder = Order(
                 employeeName = employeeName,
