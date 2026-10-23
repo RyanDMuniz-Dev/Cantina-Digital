@@ -18,6 +18,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,7 +53,9 @@ fun Tela(
     val red = Color(0xFFFF8080)
     val black = Color(0xFF1E1C1C)
 
-    Column{
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
         /*Row(){
             //barra de cima
         }*/
@@ -65,14 +71,16 @@ fun Tela(
         Row(){
             Text( // provavelmente não é só text
                 text = "Preferências",
-                fontSize = 30.sp
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = modifier.padding(top = 40.dp)
             )
         }
-
+        Spacer(modifier = Modifier.height(20.dp))
         DarkMode(
             verification = darkMode,
             backgroundDark = darkModeChange,
-            modifier = Modifier.padding(bottom = 20.dp)
+            modifier = Modifier.padding(start = 120.dp, bottom = 20.dp)
         )
         /*Row(){
             Column(){
@@ -85,14 +93,14 @@ fun Tela(
             }
         }*/
 
-        Spacer(modifier = Modifier.width(10.dp))
-
+        Spacer(modifier = Modifier.height(400.dp))
         Row(){
             Text(// provavelmente não é só text
-                text = "Dados"
+                text = "Dados",
+                fontWeight = FontWeight.Bold
             )
         }
-
+        Spacer(modifier = Modifier.height(30.dp))
         Row(){
             Column(){
                 //excluir conta da cantina
@@ -101,7 +109,6 @@ fun Tela(
                 //alterar conta da cantina
             }
         }
-        //espaço
 
         Row(){
             Button(
@@ -118,6 +125,7 @@ fun Tela(
                     fontWeight = FontWeight.Bold
                 )
             }
+            Spacer(modifier = Modifier.width(20.dp))
             Button(
                 onClick = {
 

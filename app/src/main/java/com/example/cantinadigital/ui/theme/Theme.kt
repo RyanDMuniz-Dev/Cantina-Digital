@@ -13,24 +13,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme( //modo escuro cores
-    primary = Color(0xFF3F4048),
-    background = Color(0xFFB7DA85),
-    surface = Color(0xFF278A56),
-    /*onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,*/
-    onBackground = Color(0xFF3F303F),
-    onSurface = Color(0xFF878694)
+    primary = Color(0xFF2E4C91), //Switch
+    background = Color(0xFF131212), //Fundo
+    surface = Color(0xFF19C9BA),
+    onPrimary = Color.White,
+    /*onSecondary = Color(0xFFE36578),
+    onTertiary = Color(0xFFA8E365),*/
+    onBackground = Color(0xFF659FE3), //Textos
+    onSurface = Color(0xFF000BD4)
 )
 
 private val LightColorScheme = lightColorScheme( //modo claro cores
-    primary = Color(0xFF3F4048),
-    background = Color(0xFFFFFBFE),
+    primary = Color(0xFF3F4048), //Switch
+    background = Color(0xFFFFFBFE), //Fundo
     surface = Color(0xFFFFFBFE),
     /*onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White,*/
-    onBackground = Color(0xFF471EB2),
+    onBackground = Color(0xFF000000), //Textos
     onSurface = Color(0xFFD3C1F3)
 )
 
