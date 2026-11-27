@@ -46,7 +46,7 @@ fun AppNavigation() {
     LaunchedEffect(Unit) {
         // Verifica se há um usuário logado no Firebase Auth
         val currentUser = FirebaseProvider.auth.currentUser
-        startDestination = if (currentUser != null) Screen.Perfil.route else Screen.SignUp.route
+        startDestination = if (currentUser != null) Screen.Perfil.route else Screen.Perfil.route
         isCheckingSection = false
     }
 
