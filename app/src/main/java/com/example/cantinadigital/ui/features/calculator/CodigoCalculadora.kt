@@ -1,4 +1,4 @@
-package com.example.cantinadigital.codigoCalculadora
+package com.example.cantinadigital.ui.features.calculator
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -67,7 +67,7 @@ fun Calculadora(modifier: Modifier = Modifier){
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.scale(1.4F)
+            modifier = Modifier.scale(1.2F)
         ) {
             Row {
                 Column(modifier = Modifier.width(250.dp)) {

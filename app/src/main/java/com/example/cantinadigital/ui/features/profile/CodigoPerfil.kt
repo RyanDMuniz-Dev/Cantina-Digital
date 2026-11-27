@@ -1,4 +1,4 @@
-package com.example.cantinadigital.codigoTelaPerfil
+package com.example.cantinadigital.ui.features.profile
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

@@ -23,6 +23,7 @@ import com.example.cantinadigital.ui.features.orders.OrdersScreen
 import com.example.cantinadigital.ui.features.stock.StockScreen
 
 const val ROUTE_LOGS = "logs"
+const val ROUTE_PROFILE = "profile"
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
@@ -48,7 +49,11 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     }
                 },
                 onProfileClick = {
-
+                    if (currentRoute != ROUTE_PROFILE) {
+                        navController.navigate(ROUTE_PROFILE) {
+                            launchSingleTop = true
+                        }
+                    }
                 }
             )
         },
@@ -129,6 +134,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 )
             }
 
+            composable(ROUTE_PROFILE) {
+
+            }
         }
 
     }
