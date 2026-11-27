@@ -2,12 +2,16 @@ package com.example.cantinadigital.ui.navigation
 
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -17,6 +21,7 @@ import com.example.cantinadigital.data.remote.FirebaseProvider
 import com.example.cantinadigital.ui.mainScreen.MainScreen
 import com.example.cantinadigital.ui.features.login.LoginScreen
 import com.example.cantinadigital.ui.features.signup.SignUpScreen
+import com.example.cantinadigital.ui.theme.CantinaDigitalTheme
 
 sealed class Screen(
     val route: String
@@ -33,6 +38,7 @@ fun AppNavigation() {
 
     var startDestination by remember { mutableStateOf(Screen.SignUp.route) }
     var isCheckingSection by remember { mutableStateOf(true) }
+    var darkMode by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         // Verifica se há um usuário logado no Firebase Auth
@@ -43,52 +49,59 @@ fun AppNavigation() {
 
     if (isCheckingSection) return
 
-    NavHost(
-        navController = navController,
-        startDestination = startDestination,
-        enterTransition = {
-            slideInHorizontally(initialOffsetX = { it })
-        },
-        exitTransition = {
-            slideOutHorizontally(targetOffsetX = { -it })
-        },
-        popEnterTransition = {
-            slideInHorizontally(initialOffsetX = { -it })
-        },
-        popExitTransition = {
-            slideOutHorizontally(targetOffsetX = { it })
-        }
-    ) {
-        composable(Screen.SignUp.route) {
-            SignUpScreen(
-                viewModel = hiltViewModel(),
-                onSignUpSuccess = {
-                    navController.navigate(Screen.Main.route) {
-                        popUpTo(Screen.SignUp.route) { inclusive = true }
-                    }
+    CantinaDigitalTheme(darkTheme = darkMode) {
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            NavHost(
+                navController = navController,
+                startDestination = startDestination,
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { it })
                 },
-                onNavigateToLogin = {
-                    navController.navigate(Screen.Login.route)
-                }
-            )
-        }
-
-        composable(Screen.Login.route) {
-            LoginScreen(
-                viewModel = hiltViewModel(),
-                onLoginSuccess = {
-                    navController.navigate(Screen.Main.route) {
-                        popUpTo(Screen.SignUp.route) { inclusive = true }
-                    }
+                exitTransition = {
+                    slideOutHorizontally(targetOffsetX = { -it })
                 },
-                onNavigateToSignUp = {
-                    navController.popBackStack()
+                popEnterTransition = {
+                    slideInHorizontally(initialOffsetX = { -it })
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { it })
                 }
-            )
-        }
+            ) {
+                composable(Screen.SignUp.route) {
+                    SignUpScreen(
+                        viewModel = hiltViewModel(),
+                        onSignUpSuccess = {
+                            navController.navigate(Screen.Main.route) {
+                                popUpTo(Screen.SignUp.route) { inclusive = true }
+                            }
+                        },
+                        onNavigateToLogin = {
+                            navController.navigate(Screen.Login.route)
+                        }
+                    )
+                }
 
-        composable(Screen.Main.route) {
-            MainScreen()
+                composable(Screen.Login.route) {
+                    LoginScreen(
+                        viewModel = hiltViewModel(),
+                        onLoginSuccess = {
+                            navController.navigate(Screen.Main.route) {
+                                popUpTo(Screen.SignUp.route) { inclusive = true }
+                            }
+                        },
+                        onNavigateToSignUp = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                composable(Screen.Main.route) {
+                    MainScreen()
+                }
+            }
         }
     }
 }

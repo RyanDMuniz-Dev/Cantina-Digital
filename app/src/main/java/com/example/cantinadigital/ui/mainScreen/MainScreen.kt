@@ -20,13 +20,16 @@ import com.example.cantinadigital.ui.features.dashboard.DashboardScreen
 import com.example.cantinadigital.ui.features.insights.InsightsScreen
 import com.example.cantinadigital.ui.features.logs.LogsScreen
 import com.example.cantinadigital.ui.features.orders.OrdersScreen
+import com.example.cantinadigital.ui.features.profile.Tela
 import com.example.cantinadigital.ui.features.stock.StockScreen
 
 const val ROUTE_LOGS = "logs"
 const val ROUTE_PROFILE = "profile"
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
+fun MainScreen(
+    modifier: Modifier = Modifier
+) {
 
     val navController = rememberNavController()
 
@@ -135,7 +138,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
 
             composable(ROUTE_PROFILE) {
-
+                Tela(false, {})
             }
         }
 

@@ -24,7 +24,7 @@ private val DarkColorScheme = darkColorScheme( //modo escuro cores
 )
 
 private val LightColorScheme = lightColorScheme( //modo claro cores
-    primary = Color(0xFF3F4048), //Switch
+    primary = PrimaryBlueDark, //Switch
     background = Color(0xFFFFFBFE), //Fundo
     surface = Color(0xFFFFFBFE),
     /*onPrimary = Color.White,
@@ -37,7 +37,6 @@ private val LightColorScheme = lightColorScheme( //modo claro cores
 @Composable
 fun CantinaDigitalTheme(
     darkTheme: Boolean = false,
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {

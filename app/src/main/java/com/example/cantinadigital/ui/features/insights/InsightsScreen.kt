@@ -97,7 +97,6 @@ fun InsightsScreen(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Opções em formato de pílula que aparecem ao expandir o FAB
                 AnimatedVisibility(
                     visible = isFabExpanded,
                     enter = fadeIn(tween(200)) + expandVertically(expandFrom = Alignment.Bottom),
@@ -107,7 +106,6 @@ fun InsightsScreen(
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // 1. Botão para Lançar Caixa
                         InsightFabPill(
                             label = "Lançar Caixa",
                             icon = Icons.Default.Add,
@@ -117,7 +115,6 @@ fun InsightsScreen(
                             }
                         )
 
-                        // 2. Botão para Gerar Relatório PDF
                         InsightFabPill(
                             label = "Gerar PDF",
                             icon = Icons.Default.Create,
@@ -127,7 +124,6 @@ fun InsightsScreen(
                             }
                         )
 
-                        // 3. Botão para Abrir a Calculadora
                         InsightFabPill(
                             label = "Calculadora",
                             icon = Icons.Default.Phone,
@@ -139,7 +135,6 @@ fun InsightsScreen(
                     }
                 }
 
-                // Botão principal circular (+ / Menu)
                 FloatingActionButton(
                     onClick = { isFabExpanded = !isFabExpanded },
                     shape = CircleShape,
@@ -289,7 +284,6 @@ fun InsightsScreen(
                         }
                     }
 
-                    // Componente de Abas
                     item {
                         Box(modifier = Modifier.padding(horizontal = 20.dp)) {
                             Card(
@@ -379,7 +373,6 @@ fun InsightsScreen(
             }
         }
 
-        // Diálogo para lançamento de movimentação de caixa
         if (showAddTransactionDialog) {
             AddTransactionDialog(
                 onDismissRequest = { showAddTransactionDialog = false },
@@ -390,7 +383,6 @@ fun InsightsScreen(
             )
         }
 
-        // Diálogo de confirmação de repasse
         selectPayoutForConfirmation?.let { summary ->
             ConfirmPayoutDialog(
                 summary = summary,
@@ -404,7 +396,6 @@ fun InsightsScreen(
             )
         }
 
-        // Diálogo da Calculadora Flutuante
         if (showCalculatorDialog) {
             Dialog(onDismissRequest = { showCalculatorDialog = false }) {
                 Surface(
@@ -440,9 +431,6 @@ fun InsightsScreen(
     }
 }
 
-/**
- * Componente visual de pílula para as opções do FAB flutuante.
- */
 @Composable
 private fun InsightFabPill(
     label: String,

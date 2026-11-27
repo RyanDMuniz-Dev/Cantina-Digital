@@ -51,7 +51,6 @@ fun ExpandableFab(
         label = "scrimAlpha"
     )
 
-    // Rotação de 45 graus para transformar o "+" em "X"
     val iconRotation by animateFloatAsState(
         targetValue = if (expanded) 45f else 0f,
         animationSpec = tween(durationMillis = 250),
@@ -59,7 +58,6 @@ fun ExpandableFab(
     )
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Fundo escuro clicável para fechar o menu
         if (expanded || scrimAlpha > 0f) {
             Box(
                 modifier = Modifier
@@ -72,7 +70,7 @@ fun ExpandableFab(
                     )
             )
         }
-        // Coluna alinhada no canto inferior direito
+
         Column(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -80,7 +78,6 @@ fun ExpandableFab(
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
         ) {
-            // Lista de opções em formato de pílula
             AnimatedVisibility(
                 visible = expanded,
                 enter = fadeIn(tween(200)) + expandVertically(expandFrom = Alignment.Bottom),
@@ -102,7 +99,6 @@ fun ExpandableFab(
                 }
             }
 
-            // Botão principal circular (+ / X)
             FloatingActionButton(
                 onClick = { onExpandedChange(!expanded) },
                 shape = CircleShape,
@@ -129,8 +125,8 @@ private fun FabPillItem(
 ) {
     Surface(
         onClick = onClick,
-        shape = CircleShape, // Garante as bordas totalmente arredondadas (pílula)
-        color = Color(0xFF2B3A55), // Tom azul escuro semelhante ao da imagem
+        shape = CircleShape,
+        color = Color(0xFF2B3A55),
         contentColor = Color.White,
         shadowElevation = 4.dp
     ) {
