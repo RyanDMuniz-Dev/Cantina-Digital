@@ -53,7 +53,8 @@ fun AppNavigation() {
         Surface(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
-        ) {
+        ) { /*coloquei o NavHost dentro do surface para o tema ser global, isso porque o tema escuro
+            foi feito por mim, mas se formos usar outro, não tem problema tirar essa parte*/
             NavHost(
                 navController = navController,
                 startDestination = startDestination,
